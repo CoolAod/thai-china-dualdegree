@@ -162,7 +162,7 @@
             <span id="photoStatusText">ไฟล์ JPG/PNG ขนาดไม่เกิน 2MB — อัปโหลดขึ้น Google Drive ทันทีที่เลือกไฟล์</span>
             <div style="margin-top:8px;"><label class="file-btn" for="photoInput">เลือกไฟล์รูปภาพ</label></div>
             <input type="file" id="photoInput" accept="image/*" style="display:none;">
-            <input type="hidden" id="photoUrl" value="">
+            <input type="hidden" id="photo" value="">
           </div>
         </div>
 
@@ -299,7 +299,7 @@
 
 <script>
   // ---------- ตั้งค่า backend ----------
-  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyhGHBUIEsAMFoB3lsiOaMFzNkIpA1dBCyCP6-iSzSNFLY2CPI-mGDiRcKZo2r1yXbAeQ/exec";
   const ADMIN_TOKEN = sessionStorage.getItem('tc_admin_token') || '';
   const ADMIN_NAME = sessionStorage.getItem('tc_admin_name') || 'ผู้ดูแลระบบ';
 
