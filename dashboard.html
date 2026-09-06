@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบทวิวุฒิ ไทย–จีน | วิทยาลัยเทคนิคประจวบคีรีขันธ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --blue-900:#0B3E8F;
+    --blue-700:#2563EB;
+    --blue-600:#3B82F6;
+    --blue-500:#4F8EF7;
+    --cyan-400:#38BDF8;
+    --indigo-500:#4F46E5;
+    --sky-50:#F3F7FF;
+    --sky-100:#EAF1FF;
+    --ink-900:#12213D;
+    --ink-600:#4C5C77;
+    --ink-400:#8494AC;
+    --line:#E1E9F7;
+    --white:#FFFFFF;
+    --amber:#F5A524;
+    --green:#22C08D;
+    --pink:#EC6FA6;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --shadow-soft: 0 10px 30px -12px rgba(23,60,140,.18);
+    --shadow-tiny: 0 4px 14px -6px rgba(23,60,140,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Prompt','Sarabun',sans-serif;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, #E9F1FF 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, #EEF4FF 0%, transparent 55%),
+      var(--sky-50);
+    color:var(--ink-900);
+    min-height:100vh;
+  }
+  a{text-decoration:none;color:inherit;}
+  .app{max-width:1360px;margin:0 auto;padding:22px 28px 60px;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    margin-bottom:22px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-badge{
+    width:46px;height:46px;border-radius:14px;
+    background:linear-gradient(135deg,var(--blue-700),var(--cyan-400));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:18px;
+    box-shadow:0 8px 18px -6px rgba(37,99,235,.55);
+    flex-shrink:0;
+  }
+  .brand-text h1{font-size:16.5px;margin:0;font-weight:700;color:var(--ink-900);}
+  .brand-text p{font-size:12.5px;margin:2px 0 0;color:var(--ink-400);font-weight:400;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .search-mini{
+    display:flex;align-items:center;gap:8px;
+    background:var(--sky-100);border-radius:12px;
+    padding:9px 14px;min-width:230px;
+  }
+  .search-mini input{
+    border:none;background:transparent;outline:none;
+    font-family:inherit;font-size:13.5px;color:var(--ink-900);width:100%;
+  }
+  .search-mini svg{flex-shrink:0;}
+  .btn-admin{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--blue-700),var(--indigo-500));
+    color:#fff;border:none;padding:11px 20px;border-radius:12px;
+    font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer;
+    box-shadow:0 10px 22px -8px rgba(37,99,235,.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-admin:hover{transform:translateY(-1px);box-shadow:0 14px 26px -8px rgba(37,99,235,.6);}
+  .btn-admin:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible{
+    outline:3px solid #93C5FD;outline-offset:2px;
+  }
+
+  /* ---------- Section headers ---------- */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:30px 2px 14px;flex-wrap:wrap;gap:8px;}
+  .section-head h2{font-size:17px;margin:0;font-weight:700;color:var(--ink-900);}
+  .section-head span{font-size:12.5px;color:var(--ink-400);}
+
+  /* ---------- KPI Cards ---------- */
+  .kpi-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:16px;
+  }
+  .kpi-card{
+    position:relative;overflow:hidden;
+    border-radius:var(--radius-lg);
+    padding:20px 20px 18px;
+    color:#fff;
+    box-shadow:var(--shadow-soft);
+    min-height:118px;
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .kpi-card .kpi-icon{
+    width:38px;height:38px;border-radius:11px;
+    background:rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .kpi-card .kpi-value{font-size:26px;font-weight:700;line-height:1;margin-top:14px;}
+  .kpi-card .kpi-label{font-size:12.5px;opacity:.92;margin-top:6px;font-weight:400;}
+  .kpi-card .kpi-delta{
+    position:absolute;top:18px;right:18px;font-size:11px;font-weight:600;
+    background:rgba(255,255,255,.22);padding:4px 9px;border-radius:20px;
+  }
+  .kpi-c1{background:linear-gradient(135deg,#2563EB,#38BDF8);}
+  .kpi-c2{background:linear-gradient(135deg,#1D4ED8,#6366F1);}
+  .kpi-c3{background:linear-gradient(135deg,#0EA5E9,#22D3EE);}
+  .kpi-c4{background:linear-gradient(135deg,#22C08D,#38BDF8);}
+  .kpi-c5{background:linear-gradient(135deg,#F5A524,#EC6FA6);}
+
+  /* ---------- Filter bar ---------- */
+  .filter-bar{
+    background:var(--white);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-tiny);
+    padding:18px 20px;
+    display:flex;flex-wrap:wrap;gap:12px;align-items:end;
+  }
+  .filter-field{display:flex;flex-direction:column;gap:6px;min-width:150px;flex:1;}
+  .filter-field label{font-size:11.5px;color:var(--ink-400);font-weight:500;}
+  .filter-field select{
+    appearance:none;-webkit-appearance:none;
+    border:1.5px solid var(--line);border-radius:10px;
+    padding:9px 30px 9px 12px;font-family:inherit;font-size:13px;color:var(--ink-900);
+    background:var(--sky-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238494AC'/%3E%3C/svg%3E") no-repeat right 12px center;
+    cursor:pointer;
+  }
+  .filter-actions{display:flex;gap:10px;}
+  .btn-apply{
+    background:linear-gradient(135deg,var(--blue-700),var(--cyan-400));
+    color:#fff;border:none;padding:10px 22px;border-radius:10px;
+    font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;
+  }
+  .btn-reset{
+    background:var(--sky-100);color:var(--ink-600);border:none;
+    padding:10px 18px;border-radius:10px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;
+  }
+
+  /* ---------- Charts grid ---------- */
+  .charts-grid{
+    display:grid;grid-template-columns:1.4fr 1fr;gap:18px;
+  }
+  .charts-grid.row2{grid-template-columns:1fr 1fr 1fr;margin-top:18px;}
+  .chart-card{
+    background:var(--white);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-tiny);padding:20px 20px 8px;
+  }
+  .chart-card h3{margin:0 0 2px;font-size:14.5px;font-weight:600;color:var(--ink-900);}
+  .chart-card p.sub{margin:0 0 12px;font-size:12px;color:var(--ink-400);}
+  .chart-wrap{position:relative;height:230px;}
+  .chart-wrap.short{height:190px;}
+
+  /* ---------- Table ---------- */
+  .table-card{
+    background:var(--white);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-tiny);padding:20px;
+  }
+  .table-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .table-search{
+    display:flex;align-items:center;gap:8px;background:var(--sky-100);
+    border-radius:11px;padding:9px 14px;min-width:260px;
+  }
+  .table-search input{border:none;background:transparent;outline:none;font-family:inherit;font-size:13.5px;width:100%;color:var(--ink-900);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;padding:10px 12px;color:var(--ink-400);font-weight:500;
+    border-bottom:1.5px solid var(--line);font-size:12px;white-space:nowrap;
+  }
+  tbody td{padding:12px;border-bottom:1px solid var(--line);color:var(--ink-900);vertical-align:middle;}
+  tbody tr:hover{background:var(--sky-50);}
+  .avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--blue-600),var(--cyan-400));
+    color:#fff;display:inline-flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;margin-right:10px;vertical-align:middle;
+  }
+  .name-cell{display:flex;align-items:center;}
+  .badge{padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600;display:inline-block;}
+  .badge-studying{background:#E6F7EF;color:#1AA179;}
+  .badge-graduated{background:#E8EEFF;color:#3355D8;}
+  .badge-leave{background:#FFF3E2;color:#C4820B;}
+  .badge-dropped{background:#FDE8EA;color:#D6395A;}
+  .pager{display:flex;justify-content:flex-end;gap:6px;margin-top:14px;}
+  .pager button{
+    width:32px;height:32px;border-radius:9px;border:1.5px solid var(--line);
+    background:var(--white);cursor:pointer;font-family:inherit;font-size:12.5px;color:var(--ink-600);
+  }
+  .pager button.active{background:linear-gradient(135deg,var(--blue-700),var(--cyan-400));color:#fff;border:none;}
+
+  .empty-note{font-size:12px;color:var(--ink-400);text-align:center;padding:20px 0;display:none;}
+
+  /* ---------- Data source banner + loading ---------- */
+  .data-banner{
+    display:none;align-items:center;gap:10px;background:#FFF3E2;color:#C4820B;
+    border-radius:12px;padding:10px 16px;font-size:12.5px;font-weight:500;margin-bottom:16px;
+  }
+  .data-banner.show{display:flex;}
+  .btn-link{background:var(--sky-100);color:var(--ink-600);}
+  .admin-menu{position:relative;}
+  .admin-dropdown{
+    display:none;position:absolute;right:0;top:calc(100% + 8px);background:#fff;border-radius:14px;
+    box-shadow:var(--shadow-soft);padding:8px;min-width:190px;z-index:20;
+  }
+  .admin-dropdown.show{display:block;}
+  .admin-dropdown a{
+    display:block;padding:10px 12px;border-radius:9px;font-size:13px;color:var(--ink-900);font-weight:500;
+  }
+  .admin-dropdown a:hover{background:var(--sky-50);}
+  .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.35) 25%,rgba(255,255,255,.6) 37%,rgba(255,255,255,.35) 63%);
+    background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  .kpi-value.skeleton{display:inline-block;min-width:70px;height:24px;}
+  @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:1180px){
+    .kpi-grid{grid-template-columns:repeat(3,1fr);}
+    .charts-grid{grid-template-columns:1fr;}
+    .charts-grid.row2{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:760px){
+    .app{padding:16px;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .charts-grid.row2{grid-template-columns:1fr;}
+    .topbar{flex-direction:column;align-items:stretch;}
+    .search-mini{min-width:0;}
+    table{font-size:12px;}
+    thead th:nth-child(4), tbody td:nth-child(4),
+    thead th:nth-child(5), tbody td:nth-child(5){display:none;}
+  }
+  @media (max-width:480px){
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn-admin{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">TC</div>
+      <div class="brand-text">
+        <h1>ระบบข้อมูลนักเรียนทวิวุฒิ ไทย–จีน</h1>
+        <p>วิทยาลัยเทคนิคประจวบคีรีขันธ์ · แผนกวิชาเทคโนโลยีธุรกิจดิจิทัล</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-mini">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#8494AC" stroke-width="2"/><path d="M21 21l-4-4" stroke="#8494AC" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="ค้นหานักเรียนด่วน...">
+      </div>
+      <div class="admin-menu">
+        <button class="btn-admin" id="adminLoginBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="#fff" stroke-width="2"/><path d="M4 20c1.5-3.5 5-5 8-5s6.5 1.5 8 5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="adminBtnLabel">เข้าสู่ระบบผู้ดูแล</span>
+        </button>
+        <div class="admin-dropdown" id="adminDropdown">
+          <a href="student-form.html">+ เพิ่มข้อมูลนักเรียน</a>
+          <a href="master-data.html">จัดการข้อมูลพื้นฐาน</a>
+          <a href="change-password.html">เปลี่ยนรหัสผ่าน</a>
+          <a href="#" id="logoutLink">ออกจากระบบ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-banner" id="dataBanner">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+    <span>ยังไม่ได้เชื่อมต่อ Google Sheets จริง (API_URL) — กำลังแสดงข้อมูลตัวอย่างเพื่อสาธิตหน้าจอ</span>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-c1">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 2 7l10 5 10-5-10-5Z" stroke="#fff" stroke-width="1.6"/><path d="M6 10v6c0 1.5 2.7 3 6 3s6-1.5 6-3v-6" stroke="#fff" stroke-width="1.6"/></svg>
+      </div>
+      <div class="kpi-delta">+4.8%</div>
+      <div>
+        <div class="kpi-value skeleton" id="kpiTotalStudents">&nbsp;</div>
+        <div class="kpi-label">นักเรียน–นักศึกษาทั้งหมด</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-c2">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4V4Z" stroke="#fff" stroke-width="1.6"/><path d="M13 4h7v7h-7V4Z" stroke="#fff" stroke-width="1.6"/><path d="M4 13h7v7H4v-7Z" stroke="#fff" stroke-width="1.6"/><path d="M13 13h7v7h-7v-7Z" stroke="#fff" stroke-width="1.6"/></svg>
+      </div>
+      <div class="kpi-delta">+12%</div>
+      <div>
+        <div class="kpi-value skeleton" id="kpiTotalDual">&nbsp;</div>
+        <div class="kpi-label">ผู้เรียนทวิวุฒิทั้งหมด</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-c3">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.7"/></svg>
+      </div>
+      <div>
+        <div class="kpi-value skeleton" id="kpiStudying">&nbsp;</div>
+        <div class="kpi-label">กำลังศึกษา (ทวิวุฒิ)</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-c4">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-10" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="kpi-value skeleton" id="kpiGraduated">&nbsp;</div>
+        <div class="kpi-label">สำเร็จการศึกษา (ทวิวุฒิ)</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-c5">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h4l3 8 4-16 3 8h4" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="kpi-value skeleton" id="kpiChinaSchools">&nbsp;</div>
+        <div class="kpi-label">สถานศึกษาจีนที่ร่วมโครงการ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="section-head"><h2>ตัวกรองข้อมูล</h2><span>เลือกเงื่อนไขเพื่อกรองแดชบอร์ดและตารางด้านล่างทันที</span></div>
+  <div class="filter-bar">
+    <div class="filter-field">
+      <label>ปีการศึกษา</label>
+      <select id="fYear"><option value="">ทั้งหมด</option><option>2567</option><option>2568</option><option selected>2569</option></select>
+    </div>
+    <div class="filter-field">
+      <label>แผนกวิชา</label>
+      <select id="fDept">
+        <option value="">ทั้งหมด</option>
+        <option>ช่างยนต์</option><option>ช่างไฟฟ้า</option><option>ช่างกลโรงงาน</option>
+        <option>ช่างเชื่อมโลหะ</option><option>ช่างก่อสร้าง</option><option>ช่างอิเล็กทรอนิกส์</option>
+        <option>เมคคาทรอนิกส์</option><option>ยานยนต์ไฟฟ้า</option><option>สถาปัตยกรรม</option>
+        <option>การโรงแรม</option><option>การบัญชี</option><option>การตลาด</option>
+        <option>เทคโนโลยีธุรกิจดิจิทัล</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>ระดับการศึกษา</label>
+      <select id="fLevel"><option value="">ทั้งหมด</option><option>ปวช.</option><option>ปวส.</option></select>
+    </div>
+    <div class="filter-field">
+      <label>สถานะ</label>
+      <select id="fStatus"><option value="">ทั้งหมด</option><option>กำลังศึกษา</option><option>สำเร็จการศึกษา</option><option>พักการศึกษา</option><option>ลาออก</option><option>พ้นสภาพ</option></select>
+    </div>
+    <div class="filter-field">
+      <label>ประเทศ</label>
+      <select id="fCountry"><option value="">ทั้งหมด</option><option>ไทย</option><option>จีน</option></select>
+    </div>
+    <div class="filter-field">
+      <label>สถานศึกษาจีน</label>
+      <select id="fSchool"><option value="">ทั้งหมด</option><option>Guangxi Vocational College</option><option>Yunnan College of Business</option><option>Chengdu Polytechnic</option></select>
+    </div>
+    <div class="filter-field">
+      <label>รุ่น</label>
+      <select id="fCohort"><option value="">ทั้งหมด</option><option>รุ่น 12</option><option>รุ่น 13</option><option>รุ่น 14</option></select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-apply" id="applyFilter">กรองข้อมูล</button>
+      <button class="btn-reset" id="resetFilter">ล้างตัวกรอง</button>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="section-head"><h2>ภาพรวมสถิติ</h2><span>ข้อมูลอัปเดตล่าสุด ณ ปีการศึกษา 2569</span></div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>จำนวนผู้เรียนแยกตามแผนกวิชา</h3>
+      <p class="sub">13 แผนกวิชา — ปีการศึกษา 2569</p>
+      <div class="chart-wrap"><canvas id="chartDept"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>สัดส่วนตามสถานะการศึกษา</h3>
+      <p class="sub">ผู้เรียนทวิวุฒิทั้งหมด</p>
+      <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="charts-grid row2">
+    <div class="chart-card">
+      <h3>แนวโน้มผู้เข้าร่วมโครงการ</h3>
+      <p class="sub">รายปีการศึกษา</p>
+      <div class="chart-wrap short"><canvas id="chartTrend"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>สถานศึกษาจีนที่เข้าร่วม</h3>
+      <p class="sub">จำนวนผู้เรียนต่อสถานศึกษา</p>
+      <div class="chart-wrap short"><canvas id="chartChina"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>ระดับการศึกษา</h3>
+      <p class="sub">ปวช. เทียบกับ ปวส.</p>
+      <div class="chart-wrap short"><canvas id="chartLevel"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="section-head"><h2>รายชื่อนักเรียน–นักศึกษา</h2><span>แสดงผลตามตัวกรองด้านบน</span></div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#8494AC" stroke-width="2"/><path d="M21 21l-4-4" stroke="#8494AC" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="tableSearch" placeholder="ค้นหาด้วยชื่อ, รหัสนักเรียน, สาขาวิชา, สถานศึกษาจีน...">
+      </div>
+      <button class="btn-reset" id="exportBtn">ส่งออก Excel</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>รหัสนักเรียน</th><th>ชื่อ–นามสกุล</th><th>แผนกวิชา</th><th>สาขาวิชา</th>
+          <th>สถานศึกษาจีน</th><th>ปีการศึกษา</th><th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="studentTbody"></tbody>
+    </table>
+    <div class="empty-note" id="emptyNote">ไม่พบข้อมูลที่ตรงกับการค้นหา</div>
+    <div class="pager">
+      <button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>›</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  // =====================================================================
+  //  ตั้งค่าการเชื่อมต่อ Google Apps Script (Web App) ที่ deploy จาก Code.gs
+  //  แทนที่ URL ด้านล่างด้วย URL จริงหลัง deploy แล้ว
+  // =====================================================================
+  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+
+  // ---------- ข้อมูลตัวอย่างสำรอง (ใช้เมื่อยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อไม่สำเร็จ) ----------
+  const MOCK_STATS = {
+    totalStudents: 2148, totalDualDegree: 386, studying: 298, graduated: 74, chinaSchoolCount: 9,
+    byDept: {"ช่างยนต์":22,"ช่างไฟฟ้า":38,"ช่างกลโรงงาน":19,"ช่างเชื่อมโลหะ":15,"ช่างก่อสร้าง":12,"ช่างอิเล็กทรอนิกส์":41,"เมคคาทรอนิกส์":17,"ยานยนต์ไฟฟ้า":9,"สถาปัตยกรรม":14,"การโรงแรม":63,"การบัญชี":58,"การตลาด":47,"เทคโนโลยีธุรกิจดิจิทัล":31},
+    byStatus: {"กำลังศึกษา":298,"สำเร็จการศึกษา":74,"พักการศึกษา":8,"ลาออก":6},
+    byYear: {"2565":52,"2566":96,"2567":168,"2568":240,"2569":386},
+    byChinaSchool: {"Guangxi Vocational College":142,"Yunnan College of Business":118,"Chengdu Polytechnic":126},
+    byLevel: {"ปวช.":231,"ปวส.":155}
+  };
+  const MOCK_STUDENTS = [
+    {studentCode:"64301010",firstName:"สมชาย",lastName:"ใจดี",department:"การโรงแรม",major:"การโรงแรม",cnSchoolEn:"Guangxi Vocational College",eduYear:"2569",eduStatus:"กำลังศึกษา"},
+    {studentCode:"64301022",firstName:"สมศรี",lastName:"แซ่ลิ้ม",department:"การบัญชี",major:"การบัญชี",cnSchoolEn:"Yunnan College of Business",eduYear:"2569",eduStatus:"กำลังศึกษา"},
+    {studentCode:"64201115",firstName:"ปรีชา",lastName:"วงศ์งาม",department:"เทคโนโลยีธุรกิจดิจิทัล",major:"ธุรกิจดิจิทัล",cnSchoolEn:"Chengdu Polytechnic",eduYear:"2568",eduStatus:"สำเร็จการศึกษา"},
+    {studentCode:"64301033",firstName:"สมปอง",lastName:"รักเรียน",department:"การตลาด",major:"การตลาด",cnSchoolEn:"Guangxi Vocational College",eduYear:"2569",eduStatus:"กำลังศึกษา"},
+    {studentCode:"64201099",firstName:"วิภา",lastName:"ศรีสุข",department:"การโรงแรม",major:"การโรงแรม",cnSchoolEn:"Yunnan College of Business",eduYear:"2568",eduStatus:"พักการศึกษา"},
+    {studentCode:"64301050",firstName:"อนุชา",lastName:"พงษ์พันธ์",department:"ช่างอิเล็กทรอนิกส์",major:"อิเล็กทรอนิกส์",cnSchoolEn:"Chengdu Polytechnic",eduYear:"2569",eduStatus:"กำลังศึกษา"},
+    {studentCode:"64301061",firstName:"สมหญิง",lastName:"มีสุข",department:"การบัญชี",major:"การบัญชี",cnSchoolEn:"Guangxi Vocational College",eduYear:"2569",eduStatus:"ลาออก"},
+    {studentCode:"64201077",firstName:"ธนากร",lastName:"ทองดี",department:"การตลาด",major:"การตลาด",cnSchoolEn:"Yunnan College of Business",eduYear:"2568",eduStatus:"สำเร็จการศึกษา"},
+  ];
+
+  let usingMockData = false;
+  let allStudents = [];
+  let charts = {}; // เก็บ instance ของ Chart.js ไว้เพื่อ destroy ก่อนวาดใหม่เวลากรองข้อมูล
+
+  // ---------- Safe element helper (ป้องกัน null reference ทุกจุดที่ใช้ DOM) ----------
+  function $(id){ return document.getElementById(id); }
+
+  // =====================================================================
+  //  โหลดข้อมูลจาก Google Sheets ผ่าน Apps Script — พร้อม fallback เป็น mock
+  // =====================================================================
+  async function fetchDashboard(filters={}){
+    const qs = new URLSearchParams(Object.entries(filters).filter(([,v])=>v)).toString();
+    try{
+      if(API_URL.includes('XXXXXXXX')) throw new Error('API_URL ยังไม่ได้ตั้งค่า');
+      const [statsRes, studentsRes] = await Promise.all([
+        fetch(`${API_URL}?action=getDashboardStats&${qs}`),
+        fetch(`${API_URL}?action=getStudents&${qs}`)
+      ]);
+      if(!statsRes.ok || !studentsRes.ok) throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ');
+      const statsData = await statsRes.json();
+      const studentsData = await studentsRes.json();
+      if(!statsData.success || !studentsData.success) throw new Error(statsData.message || studentsData.message || 'โหลดข้อมูลไม่สำเร็จ');
+
+      usingMockData = false;
+      return { stats: statsData.data, students: studentsData.data };
+    }catch(err){
+      console.warn('ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ ใช้ข้อมูลตัวอย่างแทน:', err.message);
+      usingMockData = true;
+      return { stats: MOCK_STATS, students: MOCK_STUDENTS };
+    }
+  }
+
+  // ---------- KPI count-up ----------
+  function animateKpi(id, target){
+    const el = $(id);
+    if(!el) return;
+    el.classList.remove('skeleton');
+    let cur = 0;
+    const step = Math.max(1, Math.round(target/40));
+    const t = setInterval(()=>{
+      cur += step;
+      if(cur>=target){cur=target;clearInterval(t);}
+      el.textContent = cur.toLocaleString('th-TH');
+    },20);
+  }
+
+  function renderKpis(stats){
+    animateKpi('kpiTotalStudents', stats.totalStudents || 0);
+    animateKpi('kpiTotalDual', stats.totalDualDegree || 0);
+    animateKpi('kpiStudying', stats.studying || 0);
+    animateKpi('kpiGraduated', stats.graduated || 0);
+    animateKpi('kpiChinaSchools', stats.chinaSchoolCount || 0);
+  }
+
+  // ---------- Chart.js defaults ----------
+  Chart.defaults.font.family = "'Prompt','Sarabun',sans-serif";
+  Chart.defaults.color = "#4C5C77";
+  Chart.defaults.font.size = 11.5;
+
+  function gradient(ctx, c1, c2){
+    const g = ctx.createLinearGradient(0,0,0,220);
+    g.addColorStop(0,c1); g.addColorStop(1,c2);
+    return g;
+  }
+  function destroyIfExists(key){ if(charts[key]){ charts[key].destroy(); delete charts[key]; } }
+
+  function renderCharts(stats){
+    const deptLabels = Object.keys(stats.byDept||{});
+    const deptValues = Object.values(stats.byDept||{});
+    destroyIfExists('dept');
+    charts.dept = new Chart($('chartDept'), {
+      type:'bar',
+      data:{ labels: deptLabels, datasets:[{ data: deptValues,
+        backgroundColor:(c)=>gradient(c.chart.ctx,'#3B82F6','#38BDF8'), borderRadius:8, maxBarThickness:26 }]},
+      options:{ plugins:{legend:{display:false}},
+        scales:{ x:{ticks:{maxRotation:55,minRotation:45},grid:{display:false}}, y:{grid:{color:'#EEF3FC'},beginAtZero:true} },
+        responsive:true, maintainAspectRatio:false }
+    });
+
+    destroyIfExists('status');
+    charts.status = new Chart($('chartStatus'), {
+      type:'doughnut',
+      data:{ labels:Object.keys(stats.byStatus||{}), datasets:[{ data:Object.values(stats.byStatus||{}),
+        backgroundColor:['#3B82F6','#22C08D','#F5A524','#EC6FA6','#8B5CF6'], borderWidth:0, hoverOffset:6 }]},
+      options:{ cutout:'68%', plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14}}},
+        responsive:true, maintainAspectRatio:false }
+    });
+
+    destroyIfExists('trend');
+    charts.trend = new Chart($('chartTrend'), {
+      type:'line',
+      data:{ labels:Object.keys(stats.byYear||{}), datasets:[{ data:Object.values(stats.byYear||{}),
+        borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,0.12)', fill:true, tension:.4,
+        pointBackgroundColor:'#2563EB', pointRadius:4 }]},
+      options:{ plugins:{legend:{display:false}},
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:'#EEF3FC'},beginAtZero:true} },
+        responsive:true, maintainAspectRatio:false }
+    });
+
+    destroyIfExists('china');
+    const chinaLabels = Object.keys(stats.byChinaSchool||{});
+    charts.china = new Chart($('chartChina'), {
+      type:'bar',
+      data:{ labels: chinaLabels.map(s=>s.split(' ')[0]), datasets:[{ data:Object.values(stats.byChinaSchool||{}),
+        backgroundColor:['#4F46E5','#3B82F6','#38BDF8','#22C08D','#F5A524'], borderRadius:8, maxBarThickness:34 }]},
+      options:{ indexAxis:'y', plugins:{legend:{display:false}},
+        scales:{ x:{grid:{color:'#EEF3FC'},beginAtZero:true}, y:{grid:{display:false}} },
+        responsive:true, maintainAspectRatio:false }
+    });
+
+    destroyIfExists('level');
+    charts.level = new Chart($('chartLevel'), {
+      type:'doughnut',
+      data:{ labels:Object.keys(stats.byLevel||{}), datasets:[{ data:Object.values(stats.byLevel||{}),
+        backgroundColor:['#38BDF8','#1D4ED8','#8B5CF6'], borderWidth:0, hoverOffset:6 }]},
+      options:{ cutout:'68%', plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:14}}},
+        responsive:true, maintainAspectRatio:false }
+    });
+  }
+
+  // ---------- Table render + live search ----------
+  const statusBadge = s => ({
+    "กำลังศึกษา":"badge-studying","สำเร็จการศึกษา":"badge-graduated",
+    "พักการศึกษา":"badge-leave","ลาออก":"badge-dropped","พ้นสภาพ":"badge-dropped"
+  }[s] || "badge-studying");
+
+  function initials(first, last){ return (first?.[0]||'') + (last?.[0]||''); }
+
+  // ป้องกัน XSS: escape ทุกค่าที่มาจาก Google Sheets ก่อนแทรกลง innerHTML เสมอ
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function renderTable(list){
+    const tbody = $('studentTbody');
+    const empty = $('emptyNote');
+    if(!tbody || !empty) return;
+    tbody.innerHTML = '';
+    if(!list || list.length === 0){ empty.style.display='block'; return; }
+    empty.style.display='none';
+    list.forEach(s=>{
+      const tr = document.createElement('tr');
+      const fullName = `${s.prefix||''}${s.firstName||''} ${s.lastName||''}`.trim();
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', ()=>{ location.href = `student-profile.html?id=${encodeURIComponent(s.studentCode||s.id||'')}`; });
+      tr.innerHTML = `
+        <td>${escapeHtml(s.studentCode || s.id || '-')}</td>
+        <td><div class="name-cell"><span class="avatar">${escapeHtml(initials(s.firstName,s.lastName))}</span>${escapeHtml(fullName || '-')}</div></td>
+        <td>${escapeHtml(s.department || s.dept || '-')}</td>
+        <td>${escapeHtml(s.major || '-')}</td>
+        <td>${escapeHtml(s.cnSchoolEn || s.school || '-')}</td>
+        <td>${escapeHtml(s.eduYear || s.year || '-')}</td>
+        <td><span class="badge ${statusBadge(s.eduStatus||s.status)}">${escapeHtml(s.eduStatus || s.status || '-')}</span></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  $('tableSearch').addEventListener('input', e=>{
+    const q = e.target.value.trim().toLowerCase();
+    if(!q){ renderTable(allStudents); return; }
+    const filtered = allStudents.filter(s =>
+      Object.values(s).some(v => String(v).toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+  });
+
+  // =====================================================================
+  //  Filters -> เรียก API ใหม่ (หรือกรอง mock บนหน้าเว็บถ้ายังไม่ได้เชื่อมต่อจริง)
+  // =====================================================================
+  function currentFilters(){
+    return {
+      year: $('fYear').value, department: $('fDept').value, level: $('fLevel').value,
+      status: $('fStatus').value, cnSchool: $('fSchool').value, cohort: $('fCohort').value,
+      country: $('fCountry').value // ใช้กรองฝั่ง client เพิ่มเติม (ดูฟังก์ชัน applyFilters)
+    };
+  }
+
+  async function loadAndRender(filters={}){
+    const { stats, students } = await fetchDashboard(filters);
+    let filteredStudents = students;
+
+    // ประเทศ: กรองฝั่ง client จากการมี/ไม่มีสถานศึกษาจีน (ใช้ได้ทั้ง mock และข้อมูลจริง)
+    if(filters.country === 'จีน') filteredStudents = filteredStudents.filter(s => s.cnSchoolEn);
+    if(filters.country === 'ไทย') filteredStudents = filteredStudents.filter(s => !s.cnSchoolEn);
+
+    allStudents = filteredStudents;
+    renderKpis(stats);
+    renderCharts(stats);
+    renderTable(filteredStudents);
+
+    const banner = $('dataBanner');
+    if(banner) banner.classList.toggle('show', usingMockData);
+  }
+
+  $('applyFilter').addEventListener('click', ()=> loadAndRender(currentFilters()));
+  $('resetFilter').addEventListener('click', ()=>{
+    document.querySelectorAll('.filter-bar select').forEach(s=> s.selectedIndex = 0);
+    loadAndRender({});
+  });
+
+  // =====================================================================
+  //  Admin session (เข้าสู่ระบบ / ออกจากระบบ / เมนูผู้ดูแล)
+  // =====================================================================
+  function refreshAdminUI(){
+    const token = sessionStorage.getItem('tc_admin_token');
+    const name = sessionStorage.getItem('tc_admin_name');
+    const label = $('adminBtnLabel');
+    if(token && name){ label.textContent = name; }
+    else { label.textContent = 'เข้าสู่ระบบผู้ดูแล'; }
+  }
+  refreshAdminUI();
+
+  $('adminLoginBtn').addEventListener('click', (e)=>{
+    const token = sessionStorage.getItem('tc_admin_token');
+    if(!token){ location.href = 'login.html'; return; }
+    $('adminDropdown').classList.toggle('show');
+  });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.admin-menu')) $('adminDropdown').classList.remove('show');
+  });
+  $('logoutLink').addEventListener('click', (e)=>{
+    e.preventDefault();
+    sessionStorage.removeItem('tc_admin_token');
+    sessionStorage.removeItem('tc_admin_name');
+    refreshAdminUI();
+    $('adminDropdown').classList.remove('show');
+  });
+
+  // ---------- โหลดครั้งแรก ----------
+  loadAndRender({});
+
+  // ---------- ส่งออก Excel (ใช้ SheetJS) — ส่งออกเฉพาะรายการที่กำลังแสดงตามตัวกรอง/ค้นหาปัจจุบัน ----------
+  $('exportBtn').addEventListener('click', ()=>{
+    if(!allStudents || allStudents.length === 0){ alert('ไม่มีข้อมูลให้ส่งออกในขณะนี้'); return; }
+    const rows = allStudents.map(s => ({
+      'รหัสนักเรียน': s.studentCode || s.id || '',
+      'คำนำหน้า': s.prefix || '',
+      'ชื่อ': s.firstName || (s.name ? s.name.split(' ')[0] : ''),
+      'นามสกุล': s.lastName || (s.name ? s.name.split(' ')[1] : ''),
+      'แผนกวิชา': s.department || s.dept || '',
+      'สาขาวิชา': s.major || '',
+      'ระดับการศึกษา': s.eduLevel || '',
+      'ปีการศึกษา': s.eduYear || s.year || '',
+      'สถานศึกษาจีน': s.cnSchoolEn || s.school || '',
+      'สถานะ': s.eduStatus || s.status || ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'นักเรียนทวิวุฒิ');
+    XLSX.writeFile(wb, `รายชื่อนักเรียน_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+</script>
+</body>
+</html>

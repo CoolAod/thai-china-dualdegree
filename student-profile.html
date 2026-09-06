@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประวัตินักเรียน | ระบบทวิวุฒิ ไทย–จีน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B3E8F; --blue-700:#2563EB; --blue-600:#3B82F6; --cyan-400:#38BDF8;
+    --indigo-500:#4F46E5; --sky-50:#F3F7FF; --sky-100:#EAF1FF;
+    --ink-900:#12213D; --ink-600:#4C5C77; --ink-400:#8494AC; --line:#E1E9F7;
+    --green:#22C08D; --green-50:#E9F9F2; --amber:#F5A524; --amber-50:#FFF3E2; --pink:#EC6FA6;
+    --radius-lg:20px; --shadow-soft:0 10px 30px -12px rgba(23,60,140,.18); --shadow-tiny:0 4px 14px -6px rgba(23,60,140,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Prompt','Sarabun',sans-serif;color:var(--ink-900);
+    background:radial-gradient(1200px 600px at 100% -10%, #E9F1FF 0%, transparent 60%), var(--sky-50);
+    min-height:100vh;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:22px 24px 60px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
+  .btn{font-family:inherit;font-weight:600;font-size:13.5px;border:none;border-radius:11px;padding:10px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+  .btn-ghost{background:#fff;color:var(--ink-600);box-shadow:var(--shadow-tiny);}
+  .btn-primary{background:linear-gradient(135deg,var(--blue-700),var(--indigo-500));color:#fff;box-shadow:0 10px 22px -8px rgba(37,99,235,.5);}
+  .btn-danger{background:#FDECEC;color:#E5484D;}
+
+  /* Header card */
+  .profile-header{
+    background:linear-gradient(120deg,#1D4ED8,#38BDF8);
+    border-radius:var(--radius-lg);padding:30px 32px;color:#fff;
+    display:flex;gap:24px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow-soft);
+    margin-bottom:20px;position:relative;overflow:hidden;
+  }
+  .profile-header::after{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;background:rgba(255,255,255,.12);border-radius:50%;}
+  .avatar-lg{
+    width:92px;height:92px;border-radius:22px;background:rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;flex-shrink:0;
+    border:3px solid rgba(255,255,255,.35);position:relative;z-index:1;
+  }
+  .h-info{flex:1;min-width:220px;position:relative;z-index:1;}
+  .h-info h1{margin:0 0 4px;font-size:21px;font-weight:700;}
+  .h-info p{margin:0;font-size:13px;opacity:.92;}
+  .h-tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .tag{background:rgba(255,255,255,.22);padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:600;}
+  .h-actions{display:flex;gap:10px;position:relative;z-index:1;}
+  .h-actions .btn-ghost{background:rgba(255,255,255,.9);}
+
+  /* Layout */
+  .layout{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start;}
+  .card{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-tiny);padding:22px 24px;}
+  .card h2{font-size:14.5px;margin:0 0 16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .card h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--blue-600);}
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+  .info-item.span2{grid-column:1/-1;}
+  .info-item span{display:block;font-size:11px;color:var(--ink-400);margin-bottom:3px;}
+  .info-item b{font-size:13.5px;font-weight:600;color:var(--ink-900);}
+  .info-item b.locked{color:var(--ink-400);font-weight:400;font-style:italic;font-size:12px;}
+
+  .divider-label{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--blue-700);border-top:1px solid var(--line);padding-top:12px;margin-top:2px;}
+
+  .status-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600;}
+  .status-studying{background:var(--green-50);color:#1AA179;}
+  .status-graduated{background:var(--sky-100);color:#3355D8;}
+
+  /* Timeline */
+  .timeline{list-style:none;margin:0;padding:0;}
+  .timeline li{
+    display:flex;gap:14px;padding-bottom:20px;position:relative;
+  }
+  .timeline li:not(:last-child)::before{
+    content:"";position:absolute;left:9px;top:22px;bottom:0;width:2px;background:var(--line);
+  }
+  .t-dot{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--blue-600),var(--cyan-400));flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .t-dot svg{width:10px;height:10px;}
+  .t-body b{font-size:13px;display:block;margin-bottom:2px;}
+  .t-body span{font-size:11.5px;color:var(--ink-400);}
+
+  /* Documents */
+  .doc-list{display:flex;flex-direction:column;gap:10px;}
+  .doc-item{
+    display:flex;align-items:center;gap:12px;background:var(--sky-50);border-radius:12px;padding:11px 14px;
+  }
+  .doc-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue-600),var(--indigo-500));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .doc-info{flex:1;min-width:0;}
+  .doc-info b{font-size:12.5px;display:block;}
+  .doc-info span{font-size:11px;color:var(--ink-400);}
+  .doc-dl{color:var(--blue-700);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
+
+  /* Edit log */
+  .log-item{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:12.5px;}
+  .log-item:last-child{border-bottom:none;}
+  .log-item .who{color:var(--ink-400);font-size:11px;}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+    .info-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .profile-header{flex-direction:column;align-items:flex-start;}
+    .h-actions{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <button class="btn btn-ghost" onclick="location.href='dashboard.html'">‹ กลับสู่แดชบอร์ด</button>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" id="editBtn" onclick="location.href='student-form.html'">แก้ไขข้อมูล</button>
+      <button class="btn btn-danger" id="deleteBtn">ลบข้อมูลนักเรียน</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="avatar-lg" id="avatarLg">สช</div>
+    <div class="h-info">
+      <h1>นายสมชาย ใจดี <span style="font-weight:400;opacity:.85;font-size:14px;">(Somchai Jaidee)</span></h1>
+      <p>รหัสนักเรียน 64301010 · แผนกวิชาการโรงแรม · ปวช.3 · รุ่น 14</p>
+      <div class="h-tags">
+        <span class="tag">ทวิวุฒิ ไทย–จีน</span>
+        <span class="tag">กำลังศึกษา</span>
+        <span class="tag">ปีการศึกษา 2569</span>
+        <span class="tag">Guangxi Vocational College</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Left column -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+      <div class="card">
+        <h2><span class="dot"></span>ข้อมูลส่วนตัว</h2>
+        <div class="info-grid">
+          <div class="info-item"><span>เพศ</span><b id="infoGender">ชาย</b></div>
+          <div class="info-item"><span>วันเดือนปีเกิด</span><b id="infoBirth">14 มีนาคม 2550 (อายุ 19 ปี)</b></div>
+          <div class="info-item"><span>เบอร์โทรศัพท์</span><b id="infoPhone">081-234-5678</b></div>
+          <div class="info-item"><span>Email</span><b id="infoEmail">somchai.j@example.com</b></div>
+          <div class="info-item span2"><span>ที่อยู่</span><b id="infoAddress">112 ม.4 ต.อ่าวน้อย อ.เมือง จ.ประจวบคีรีขันธ์</b></div>
+        </div>
+        <p style="font-size:11px;color:var(--ink-400);margin:12px 0 0;">หมายเหตุ: ระบบไม่ส่งเลขประจำตัวประชาชน, เบอร์โทรศัพท์, Email และที่อยู่ ออกผ่านหน้าเว็บนี้ไม่ว่ากรณีใด — ตรวจสอบได้จาก Google Sheet โดยตรงเท่านั้น</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>ข้อมูลการศึกษา (ไทย)</h2>
+        <div class="info-grid">
+          <div class="info-item"><span>ปีการศึกษา</span><b>2569</b></div>
+          <div class="info-item"><span>ระดับการศึกษา</span><b>ปวช.3</b></div>
+          <div class="info-item"><span>แผนกวิชา</span><b>การโรงแรม</b></div>
+          <div class="info-item"><span>สาขาวิชา</span><b>การโรงแรม</b></div>
+          <div class="info-item"><span>ห้องเรียน / กลุ่มเรียน</span><b>ปวช.3/1 · กลุ่ม A</b></div>
+          <div class="info-item"><span>วันที่เข้าศึกษา</span><b>16 พฤษภาคม 2567</b></div>
+          <div class="divider-label">สถานะปัจจุบัน</div>
+          <div class="info-item"><span>สถานะการศึกษา</span><b><span class="status-pill status-studying">กำลังศึกษา</span></b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>ข้อมูลทวิวุฒิ — ฝั่งประเทศจีน</h2>
+        <div class="info-grid">
+          <div class="info-item"><span>สถานศึกษา</span><b>Guangxi Vocational College (广西职业学院)</b></div>
+          <div class="info-item"><span>มณฑล/เมือง</span><b>หนานหนิง, กว่างซี</b></div>
+          <div class="info-item"><span>คณะ / สาขาวิชา</span><b>Hospitality Management (酒店管理)</b></div>
+          <div class="info-item"><span>รูปแบบการศึกษา</span><b>เรียนที่จีนเต็มเวลา</b></div>
+          <div class="info-item"><span>วันที่เริ่ม – วันที่จบ</span><b>1 ก.ย. 2567 – 30 มิ.ย. 2570</b></div>
+          <div class="info-item"><span>รหัสหลักสูตร</span><b>TC-CN-2567-014</b></div>
+          <div class="info-item span2"><span>คุณวุฒิที่คาดว่าจะได้รับ</span><b>ประกาศนียบัตรวิชาชีพชั้นสูง (ทวิวุฒิ) สาขาการโรงแรม</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+      <div class="card">
+        <h2><span class="dot"></span>ประวัติการศึกษา / สถานะทวิวุฒิ</h2>
+        <ul class="timeline">
+          <li><div class="t-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="t-body"><b>เข้าศึกษา ปวช.1 แผนกการโรงแรม</b><span>16 พฤษภาคม 2567</span></div></li>
+          <li><div class="t-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="t-body"><b>ผ่านการคัดเลือกเข้าร่วมโครงการทวิวุฒิ ไทย–จีน</b><span>3 กันยายน 2567</span></div></li>
+          <li><div class="t-dot" style="background:linear-gradient(135deg,#F5A524,#EC6FA6);"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="#fff"/></svg></div>
+            <div class="t-body"><b>กำลังศึกษาที่ Guangxi Vocational College</b><span>1 กันยายน 2567 – ปัจจุบัน</span></div></li>
+          <li><div class="t-dot" style="background:#D9E3F5;"><svg viewBox="0 0 24 24" fill="none"></svg></div>
+            <div class="t-body" style="opacity:.55;"><b>คาดว่าจะสำเร็จการศึกษา</b><span>30 มิถุนายน 2570</span></div></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>เอกสาร / ไฟล์แนบ</h2>
+        <div class="doc-list">
+          <div class="doc-item">
+            <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v15H6V2Z" stroke="#fff" stroke-width="1.6"/><path d="M14 2v5h5" stroke="#fff" stroke-width="1.6"/></svg></div>
+            <div class="doc-info"><b>สำเนาบัตรประชาชน.pdf</b><span>อัปโหลด 12 พ.ค. 2567 · 240 KB</span></div>
+            <span class="doc-dl">ดาวน์โหลด</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v15H6V2Z" stroke="#fff" stroke-width="1.6"/><path d="M14 2v5h5" stroke="#fff" stroke-width="1.6"/></svg></div>
+            <div class="doc-info"><b>หนังสือรับรองการเข้าร่วมโครงการ.pdf</b><span>อัปโหลด 3 ก.ย. 2567 · 512 KB</span></div>
+            <span class="doc-dl">ดาวน์โหลด</span>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v15H6V2Z" stroke="#fff" stroke-width="1.6"/><path d="M14 2v5h5" stroke="#fff" stroke-width="1.6"/></svg></div>
+            <div class="doc-info"><b>Visa และตั๋วเดินทาง.pdf</b><span>อัปโหลด 20 ส.ค. 2567 · 1.1 MB</span></div>
+            <span class="doc-dl">ดาวน์โหลด</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>ประวัติการแก้ไขข้อมูล</h2>
+        <div class="log-item">
+          <span>อัปเดตสถานะเป็น "กำลังศึกษา"</span>
+          <span class="who">อ.สมหญิง · 3 ก.ย. 67</span>
+        </div>
+        <div class="log-item">
+          <span>เพิ่มข้อมูลสถานศึกษาจีน</span>
+          <span class="who">อ.สมหญิง · 20 ส.ค. 67</span>
+        </div>
+        <div class="log-item">
+          <span>สร้างระเบียนนักเรียนใหม่</span>
+          <span class="who">แอดมิน · 16 พ.ค. 67</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- ตั้งค่า backend ----------
+  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+  const ADMIN_TOKEN = sessionStorage.getItem('tc_admin_token') || '';
+
+  // ---------- โหลดข้อมูลจริงตาม ?id= ใน URL (ถ้ามี) ----------
+  // ตัวอย่าง: student-profile.html?id=64301010
+  let currentStudentId = null;
+  async function loadStudent(){
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    if(!id) return; // ไม่มี id -> แสดงข้อมูลตัวอย่าง (mock) ตามที่เห็นในหน้านี้
+    currentStudentId = id;
+    const editBtn = document.getElementById('editBtn');
+    if(editBtn) editBtn.setAttribute('onclick', `location.href='student-form.html?code=${encodeURIComponent(id)}'`);
+
+    try{
+      const res = await fetch(`${API_URL}?action=getStudent&id=${encodeURIComponent(id)}&token=${encodeURIComponent(ADMIN_TOKEN)}`);
+      if(!res.ok) throw new Error('network');
+      const data = await res.json();
+      if(data && data.success && data.student){
+        renderStudent_(data.student, !!data.authenticated);
+      } else {
+        console.warn('ไม่พบข้อมูลนักเรียนรหัสนี้ในระบบ แสดงข้อมูลตัวอย่างแทน');
+      }
+    }catch(err){
+      console.warn('ไม่สามารถโหลดข้อมูลนักเรียนได้ในขณะนี้ แสดงข้อมูลตัวอย่างแทน', err);
+    }
+  }
+
+  /** ป้องกัน XSS: escape ค่าที่มาจาก Google Sheets ก่อนแทรกลง innerHTML เสมอ */
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  /** ผูกข้อมูลจริงที่โหลดมาลงในการ์ดต่าง ๆ ของหน้าโปรไฟล์ (ป้องกัน null ทุกจุด) */
+  function renderStudent_(s, isAuthed){
+    const setText = (sel, val) => { const el = document.querySelector(sel); if(el && val) el.textContent = val; };
+    const fullName = `${s.prefix||''}${s.firstName||''} ${s.lastName||''}`.trim();
+
+    setText('.h-info h1', fullName + (s.englishName ? ` (${s.englishName})` : ''));
+    setText('.h-info p', `รหัสนักเรียน ${s.studentCode||'-'} · แผนกวิชา${s.department||'-'} · ${s.eduLevel||''} · ${s.cohort||''}`);
+    const avatar = document.getElementById('avatarLg');
+    if(avatar) avatar.textContent = ((s.firstName||' ')[0]||'') + ((s.lastName||' ')[0]||'');
+
+    const tagsWrap = document.querySelector('.h-tags');
+    if(tagsWrap){
+      tagsWrap.innerHTML = [s.learnerType, s.eduStatus, s.eduYear ? `ปีการศึกษา ${s.eduYear}` : '', s.cnSchoolEn]
+        .filter(Boolean).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('');
+    }
+
+    setText('#infoGender', s.gender);
+
+    // เบอร์โทร/อีเมล/ที่อยู่ ถูกกันไว้ที่ backend เสมอ (NEVER_EXPORT_FIELDS) — เว็บนี้จะไม่ได้รับค่าจริง
+    // ไม่ว่าจะล็อกอินหรือไม่ก็ตาม จึงแสดงข้อความแจ้งแทนตำแหน่งเดิมเสมอ
+    const sheetOnlyMsg = 'ข้อมูลนี้เปิดดูได้ใน Google Sheet โดยตรงเท่านั้น';
+    ['infoPhone','infoEmail','infoAddress'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el){ el.textContent = sheetOnlyMsg; el.classList.add('locked'); }
+    });
+  }
+
+  loadStudent();
+
+  document.getElementById('deleteBtn').addEventListener('click', async ()=>{
+    if(!confirm('ยืนยันการลบข้อมูลนักเรียนคนนี้ออกจากระบบ? การลบไม่สามารถย้อนกลับได้')) return;
+    if(!ADMIN_TOKEN){
+      alert('กรุณาเข้าสู่ระบบผู้ดูแลระบบก่อนลบข้อมูล');
+      location.href = 'login.html';
+      return;
+    }
+    if(!currentStudentId){
+      alert('หน้านี้กำลังแสดงข้อมูลตัวอย่าง (ไม่มี ?id= ใน URL) จึงยังลบจริงไม่ได้');
+      return;
+    }
+    try{
+      const res = await fetch(API_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'deleteStudent', id: currentStudentId, token: ADMIN_TOKEN })
+      });
+      const data = await res.json();
+      if(data.success){ alert('ลบข้อมูลเรียบร้อยแล้ว'); location.href = 'dashboard.html'; }
+      else { alert(data.message || 'ลบข้อมูลไม่สำเร็จ'); }
+    }catch(err){ alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'); }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบผู้ดูแล | ระบบทวิวุฒิ ไทย–จีน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B3E8F; --blue-700:#2563EB; --blue-600:#3B82F6; --cyan-400:#38BDF8;
+    --indigo-500:#4F46E5; --sky-50:#F3F7FF; --sky-100:#EAF1FF;
+    --ink-900:#12213D; --ink-600:#4C5C77; --ink-400:#8494AC; --line:#E1E9F7;
+    --red-500:#E5484D; --red-50:#FDECEC;
+    --radius-lg:20px; --shadow-soft:0 20px 50px -20px rgba(23,60,140,.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Prompt','Sarabun',sans-serif;
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(1000px 600px at 85% -10%, rgba(79,142,247,.35), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, rgba(56,189,248,.3), transparent 55%),
+      linear-gradient(135deg,#0B3E8F 0%, #2563EB 45%, #38BDF8 100%);
+    padding:24px;
+    color:var(--ink-900);
+  }
+  .shell{
+    width:100%;max-width:920px;
+    background:#fff;border-radius:26px;
+    box-shadow:var(--shadow-soft);
+    display:grid;grid-template-columns:1.05fr 1fr;
+    overflow:hidden;
+    min-height:560px;
+  }
+  /* Left brand panel */
+  .brand-panel{
+    background:linear-gradient(160deg,#1D4ED8,#38BDF8);
+    color:#fff;padding:44px 40px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    position:relative;overflow:hidden;
+  }
+  .brand-panel::after{
+    content:"";position:absolute;right:-60px;bottom:-60px;width:220px;height:220px;
+    background:rgba(255,255,255,.12);border-radius:50%;
+  }
+  .brand-panel::before{
+    content:"";position:absolute;left:-40px;top:-40px;width:140px;height:140px;
+    background:rgba(255,255,255,.10);border-radius:50%;
+  }
+  .brand-badge{
+    width:52px;height:52px;border-radius:15px;background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px;
+  }
+  .brand-panel h2{font-size:23px;line-height:1.4;margin:26px 0 10px;font-weight:700;}
+  .brand-panel p{font-size:13.5px;line-height:1.7;opacity:.92;margin:0;max-width:300px;}
+  .brand-foot{font-size:12px;opacity:.85;position:relative;z-index:1;}
+  .stat-row{display:flex;gap:22px;margin-top:30px;position:relative;z-index:1;}
+  .stat-row div span{display:block;font-size:20px;font-weight:700;}
+  .stat-row div small{font-size:11px;opacity:.85;}
+
+  /* Right form panel */
+  .form-panel{padding:48px 44px;display:flex;flex-direction:column;justify-content:center;}
+  .form-panel h1{font-size:21px;margin:0 0 6px;font-weight:700;}
+  .form-panel p.lead{font-size:13px;color:var(--ink-400);margin:0 0 28px;}
+  label{font-size:12.5px;color:var(--ink-600);font-weight:500;display:block;margin-bottom:7px;}
+  .field{margin-bottom:18px;}
+  .input-wrap{
+    position:relative;display:flex;align-items:center;
+    border:1.6px solid var(--line);border-radius:12px;
+    padding:0 14px;background:var(--sky-50);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .input-wrap:focus-within{border-color:var(--blue-600); box-shadow:0 0 0 4px rgba(59,130,246,.13);}
+  .input-wrap svg{flex-shrink:0;margin-right:10px;}
+  .input-wrap input{
+    border:none;background:transparent;outline:none;width:100%;
+    font-family:inherit;font-size:14px;padding:12px 0;color:var(--ink-900);
+  }
+  .toggle-pass{cursor:pointer;flex-shrink:0;}
+  .row-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+  .remember{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-600);}
+  .remember input{accent-color:var(--blue-600);width:15px;height:15px;}
+  .forgot{font-size:12.5px;color:var(--blue-700);font-weight:600;}
+  .btn-login{
+    width:100%;padding:13px;border:none;border-radius:12px;
+    background:linear-gradient(135deg,var(--blue-700),var(--indigo-500));
+    color:#fff;font-family:inherit;font-weight:600;font-size:14.5px;cursor:pointer;
+    box-shadow:0 14px 28px -10px rgba(37,99,235,.55);
+    transition:transform .15s ease;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-login:hover{transform:translateY(-1px);}
+  .btn-login:disabled{opacity:.7;cursor:progress;transform:none;}
+  .spinner{
+    width:16px;height:16px;border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;
+    animation:spin .7s linear infinite;display:none;
+  }
+  .btn-login.loading .spinner{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error-box{
+    display:none;align-items:center;gap:10px;
+    background:var(--red-50);color:var(--red-500);border-radius:11px;
+    padding:11px 14px;font-size:12.5px;margin-bottom:18px;font-weight:500;
+  }
+  .error-box.show{display:flex;}
+  .back-link{margin-top:26px;text-align:center;font-size:12.5px;color:var(--ink-400);}
+  .back-link a{color:var(--blue-700);font-weight:600;}
+  .hint{font-size:11.5px;color:var(--ink-400);margin-top:8px;}
+
+  @media (max-width:760px){
+    .shell{grid-template-columns:1fr;}
+    .brand-panel{display:none;}
+    .form-panel{padding:38px 26px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .btn-login, .spinner{transition:none;animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="brand-panel">
+    <div>
+      <div class="brand-badge">TC</div>
+      <h2>ระบบข้อมูลนักเรียน<br>ทวิวุฒิ ไทย–จีน</h2>
+      <p>วิทยาลัยเทคนิคประจวบคีรีขันธ์ · สำหรับเจ้าหน้าที่และผู้ดูแลระบบเท่านั้น เข้าสู่ระบบเพื่อจัดการข้อมูลนักเรียนและดูรายงานเชิงลึก</p>
+      <div class="stat-row">
+        <div><span>13</span><small>แผนกวิชา</small></div>
+        <div><span>386</span><small>ผู้เรียนทวิวุฒิ</small></div>
+        <div><span>9</span><small>สถานศึกษาจีน</small></div>
+      </div>
+    </div>
+    <div class="brand-foot">© 2569 วิทยาลัยเทคนิคประจวบคีรีขันธ์</div>
+  </div>
+
+  <div class="form-panel">
+    <h1>เข้าสู่ระบบผู้ดูแลระบบ</h1>
+    <p class="lead">กรอกชื่อผู้ใช้และรหัสผ่านของท่านเพื่อจัดการข้อมูล</p>
+
+    <div class="error-box" id="errorBox">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+      <span id="errorText">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">ชื่อผู้ใช้</label>
+        <div class="input-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="#8494AC" stroke-width="1.7"/><path d="M4 20c1.5-3.5 5-5 8-5s6.5 1.5 8 5" stroke="#8494AC" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <input type="text" id="username" placeholder="username" autocomplete="username" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="password">รหัสผ่าน</label>
+        <div class="input-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="#8494AC" stroke-width="1.7"/><path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="#8494AC" stroke-width="1.7"/></svg>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+          <svg class="toggle-pass" id="togglePass" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="#8494AC" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="#8494AC" stroke-width="1.6"/></svg>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <label class="remember"><input type="checkbox" id="remember"> จดจำฉัน</label>
+        <a class="forgot" href="#" id="forgotLink">ลืมรหัสผ่าน?</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="loginBtn">
+        <span class="spinner"></span>
+        <span id="loginBtnText">เข้าสู่ระบบ</span>
+      </button>
+      <div class="hint">ระบบจะยืนยันตัวตนผ่าน Google Apps Script (Web App) ที่เชื่อมกับฐานข้อมูล</div>
+    </form>
+
+    <!-- ฟอร์มลืมรหัสผ่าน (ซ่อนไว้ก่อน สลับแสดงด้วย JS) -->
+    <form id="forgotForm" novalidate style="display:none;">
+      <p class="lead" style="margin-bottom:18px;">กรอกชื่อผู้ใช้หรืออีเมลที่ลงทะเบียนไว้ ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้ทางอีเมล</p>
+      <div class="field">
+        <label for="forgotInput">ชื่อผู้ใช้ หรือ อีเมล</label>
+        <div class="input-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="#8494AC" stroke-width="1.7"/><path d="M4 20c1.5-3.5 5-5 8-5s6.5 1.5 8 5" stroke="#8494AC" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <input type="text" id="forgotInput" placeholder="username หรือ name@email.com" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-login" id="forgotBtn"><span id="forgotBtnText">ส่งลิงก์ตั้งรหัสผ่านใหม่</span></button>
+      <div class="back-link" style="margin-top:16px;"><a href="#" id="backToLoginLink">‹ กลับไปเข้าสู่ระบบ</a></div>
+    </form>
+
+    <div class="back-link" id="dashboardBackLink">ไม่ใช่ผู้ดูแลระบบ? <a href="dashboard.html">กลับไปหน้าแดชบอร์ด</a></div>
+  </div>
+
+</div>
+
+<script>
+  // ตั้งค่า URL ของ Google Apps Script Web App ที่ deploy แล้ว (แทนที่ด้วย URL จริง)
+  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+
+  const form = document.getElementById('loginForm');
+  const btn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('loginBtnText');
+  const errorBox = document.getElementById('errorBox');
+  const errorText = document.getElementById('errorText');
+
+  document.getElementById('togglePass').addEventListener('click', ()=>{
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  });
+
+  function showError(msg){
+    errorText.textContent = msg;
+    errorBox.classList.add('show');
+  }
+  function hideError(){ errorBox.classList.remove('show'); }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    hideError();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if(!username || !password){
+      showError('กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน');
+      return;
+    }
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    btnText.textContent = 'กำลังตรวจสอบ...';
+
+    try{
+      // เรียก Apps Script ฝั่ง backend เพื่อตรวจสอบสิทธิ์ (ดู Code.gs → function doPost, action: "login")
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'text/plain;charset=utf-8'}, // ป้องกันปัญหา CORS preflight กับ Apps Script
+        body: JSON.stringify({ action: 'login', username, password })
+      });
+
+      if(!res.ok) throw new Error('network');
+      const data = await res.json();
+
+      if(data && data.success){
+        // เก็บ token ไว้ใช้เรียก API อื่น ๆ ที่ต้องยืนยันสิทธิ์
+        sessionStorage.setItem('tc_admin_token', data.token || '');
+        sessionStorage.setItem('tc_admin_name', data.displayName || username);
+        window.location.href = 'dashboard.html?admin=1';
+      } else {
+        showError((data && data.message) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+      }
+    } catch(err){
+      showError('ไม่สามารถเชื่อมต่อระบบได้ในขณะนี้ กรุณาตรวจสอบอินเทอร์เน็ตหรือลองใหม่ภายหลัง');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      btnText.textContent = 'เข้าสู่ระบบ';
+    }
+  });
+
+  // =====================================================================
+  //  ลืมรหัสผ่าน — สลับไปฟอร์มขอลิงก์ตั้งรหัสผ่านใหม่ทางอีเมล
+  // =====================================================================
+  const forgotForm = document.getElementById('forgotForm');
+  const forgotBtn = document.getElementById('forgotBtn');
+  const forgotBtnText = document.getElementById('forgotBtnText');
+
+  function showForgotPanel(show){
+    form.style.display = show ? 'none' : 'block';
+    forgotForm.style.display = show ? 'block' : 'none';
+    document.getElementById('dashboardBackLink').style.display = show ? 'none' : 'block';
+    hideError();
+  }
+
+  document.getElementById('forgotLink').addEventListener('click', (e)=>{
+    e.preventDefault();
+    showForgotPanel(true);
+  });
+  document.getElementById('backToLoginLink').addEventListener('click', (e)=>{
+    e.preventDefault();
+    showForgotPanel(false);
+  });
+
+  forgotForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const usernameOrEmail = document.getElementById('forgotInput').value.trim();
+    if(!usernameOrEmail){ showError('กรุณากรอกชื่อผู้ใช้หรืออีเมล'); return; }
+
+    forgotBtn.disabled = true;
+    forgotBtnText.textContent = 'กำลังส่ง...';
+    try{
+      const res = await fetch(API_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'requestPasswordReset', usernameOrEmail })
+      });
+      const data = await res.json();
+      // ไม่ว่าจะพบบัญชีหรือไม่ backend จะตอบข้อความเดียวกันเสมอ (ป้องกันการสุ่มหาชื่อผู้ใช้)
+      alert(data.message || 'หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ไปยังอีเมลที่ลงทะเบียนไว้แล้ว');
+      showForgotPanel(false);
+    }catch(err){
+      showError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต');
+    }finally{
+      forgotBtn.disabled = false;
+      forgotBtnText.textContent = 'ส่งลิงก์ตั้งรหัสผ่านใหม่';
+    }
+  });
+</script>
+</body>
+</html>

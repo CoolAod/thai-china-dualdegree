@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการข้อมูลพื้นฐาน (Master Data) | ระบบทวิวุฒิ ไทย–จีน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B3E8F; --blue-700:#2563EB; --blue-600:#3B82F6; --cyan-400:#38BDF8;
+    --indigo-500:#4F46E5; --sky-50:#F3F7FF; --sky-100:#EAF1FF;
+    --ink-900:#12213D; --ink-600:#4C5C77; --ink-400:#8494AC; --line:#E1E9F7;
+    --red-500:#E5484D; --red-50:#FDECEC; --green:#22C08D;
+    --radius-lg:20px; --shadow-soft:0 10px 30px -12px rgba(23,60,140,.18); --shadow-tiny:0 4px 14px -6px rgba(23,60,140,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Prompt','Sarabun',sans-serif;color:var(--ink-900);
+    background:radial-gradient(1200px 600px at 100% -10%, #E9F1FF 0%, transparent 60%), var(--sky-50);
+    min-height:100vh;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:22px 24px 60px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:700;}
+  .topbar p{font-size:12.5px;color:var(--ink-400);margin:3px 0 0;}
+  .btn{font-family:inherit;font-weight:600;font-size:13.5px;border:none;border-radius:11px;padding:10px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+  .btn-ghost{background:#fff;color:var(--ink-600);box-shadow:var(--shadow-tiny);}
+  .btn-primary{background:linear-gradient(135deg,var(--blue-700),var(--indigo-500));color:#fff;box-shadow:0 10px 22px -8px rgba(37,99,235,.5);}
+
+  .layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start;}
+
+  /* Category sidebar */
+  .cat-list{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:12px;}
+  .cat-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 14px;border-radius:12px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink-600);
+    margin-bottom:4px;transition:background .15s ease,color .15s ease;
+  }
+  .cat-item:hover{background:var(--sky-50);}
+  .cat-item.active{background:linear-gradient(135deg,var(--blue-700),var(--cyan-400));color:#fff;font-weight:600;}
+  .cat-item .count{
+    font-size:11px;background:rgba(0,0,0,.06);padding:2px 9px;border-radius:20px;flex-shrink:0;
+  }
+  .cat-item.active .count{background:rgba(255,255,255,.28);}
+
+  /* Main panel */
+  .panel{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:26px 28px;min-height:480px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .panel-head h2{font-size:16px;margin:0 0 4px;font-weight:700;}
+  .panel-head p{font-size:12.5px;color:var(--ink-400);margin:0;}
+
+  .add-row{display:flex;gap:10px;margin-bottom:20px;}
+  .add-row input{
+    flex:1;font-family:inherit;font-size:13.5px;border:1.6px solid var(--line);border-radius:11px;
+    padding:11px 14px;background:var(--sky-50);outline:none;
+  }
+  .add-row input:focus{border-color:var(--blue-600);box-shadow:0 0 0 4px rgba(59,130,246,.13);}
+
+  .item-list{display:flex;flex-direction:column;gap:8px;}
+  .item-row{
+    display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;
+    background:var(--sky-50);border:1px solid transparent;
+  }
+  .item-row .drag{color:var(--ink-400);flex-shrink:0;cursor:grab;}
+  .item-row .val{flex:1;font-size:13.5px;font-weight:500;}
+  .item-row input.edit-input{
+    flex:1;font-family:inherit;font-size:13.5px;border:1.6px solid var(--blue-600);border-radius:9px;
+    padding:8px 10px;outline:none;display:none;background:#fff;
+  }
+  .item-row.editing .val{display:none;}
+  .item-row.editing input.edit-input{display:block;}
+  .icon-btn{
+    width:30px;height:30px;border-radius:9px;border:none;background:#fff;color:var(--ink-400);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:var(--shadow-tiny);
+  }
+  .icon-btn:hover{color:var(--blue-700);}
+  .icon-btn.danger:hover{color:var(--red-500);}
+  .icon-btn.save{background:var(--blue-700);color:#fff;}
+
+  .empty-state{text-align:center;padding:50px 10px;color:var(--ink-400);}
+  .empty-state svg{margin-bottom:12px;}
+  .empty-state p{font-size:13px;margin:0;}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:13.5px;
+    box-shadow:0 14px 30px -10px rgba(0,0,0,.35); opacity:0; pointer-events:none;transition:all .25s ease;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr;}
+    .cat-list{display:flex;overflow-x:auto;gap:6px;padding:10px;}
+    .cat-item{flex-shrink:0;white-space:nowrap;margin-bottom:0;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <h1>จัดการข้อมูลพื้นฐาน (Master Data)</h1>
+      <p>เพิ่ม แก้ไข หรือลบตัวเลือกที่ใช้ในระบบทั้งหมด — เมื่อบันทึกแล้วจะมีผลกับ Dropdown ในหน้าเพิ่ม/แก้ไขนักเรียนทันที</p>
+    </div>
+    <button class="btn btn-ghost" onclick="location.href='dashboard.html'">‹ กลับสู่แดชบอร์ด</button>
+  </div>
+
+  <div class="layout">
+    <!-- Category sidebar -->
+    <div class="cat-list" id="catList"><!-- เติมด้วย JS --></div>
+
+    <!-- Main panel -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 id="panelTitle">ปีการศึกษา</h2>
+          <p id="panelSub">รายการปีการศึกษาที่เปิดใช้งานในระบบ</p>
+        </div>
+      </div>
+
+      <div class="add-row">
+        <input type="text" id="newItemInput" placeholder="พิมพ์ค่าที่ต้องการเพิ่ม แล้วกด Enter หรือปุ่มเพิ่ม">
+        <button class="btn btn-primary" id="addItemBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+          เพิ่มรายการ
+        </button>
+      </div>
+
+      <div class="item-list" id="itemList"><!-- เติมด้วย JS --></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="#C6D3EA" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <p>ยังไม่มีข้อมูลในหมวดหมู่นี้ — เพิ่มรายการแรกได้เลยด้านบน</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">บันทึกเรียบร้อยแล้ว</div>
+
+<script>
+  // ---------- ตั้งค่า backend ----------
+  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+  const ADMIN_TOKEN = sessionStorage.getItem('tc_admin_token') || '';
+
+  // หมวดหมู่ทั้งหมด (ต้องตรงกับ MASTER_CATEGORIES ใน Code.gs)
+  const CATEGORIES = [
+    { key:'years', label:'ปีการศึกษา', sub:'รายการปีการศึกษาที่เปิดใช้งานในระบบ' },
+    { key:'departments', label:'แผนกวิชา', sub:'13 แผนกวิชาของวิทยาลัย' },
+    { key:'majors', label:'สาขาวิชา', sub:'สาขาวิชาภายใต้แต่ละแผนก' },
+    { key:'eduLevels', label:'ระดับการศึกษา', sub:'เช่น ปวช., ปวส.' },
+    { key:'eduStatuses', label:'สถานะนักเรียน', sub:'สถานะที่ใช้แสดงในระบบ' },
+    { key:'chinaSchools', label:'สถานศึกษาจีน', sub:'สถาบันคู่ความร่วมมือฝั่งจีน' },
+    { key:'provinces', label:'จังหวัด/มณฑล', sub:'จังหวัดในไทย หรือมณฑลในจีน' },
+    { key:'countries', label:'ประเทศ', sub:'ประเทศที่เกี่ยวข้องกับโครงการ' },
+    { key:'curricula', label:'หลักสูตร', sub:'ชื่อหลักสูตรที่เปิดสอน' },
+    { key:'cohorts', label:'รุ่น', sub:'รุ่นของนักเรียนแต่ละปี' },
+    { key:'classrooms', label:'ห้องเรียน', sub:'ห้องเรียนที่ใช้ลงทะเบียน' },
+  ];
+
+  let masterData = {};      // { key: [{id, value}, ...] }
+  let currentCat = 'years';
+
+  const catListEl = document.getElementById('catList');
+  const itemListEl = document.getElementById('itemList');
+  const emptyStateEl = document.getElementById('emptyState');
+
+  function renderSidebar(){
+    catListEl.innerHTML = CATEGORIES.map(c => `
+      <div class="cat-item ${c.key===currentCat?'active':''}" data-key="${c.key}">
+        <span>${c.label}</span>
+        <span class="count">${(masterData[c.key]||[]).length}</span>
+      </div>`).join('');
+    catListEl.querySelectorAll('.cat-item').forEach(el=>{
+      el.addEventListener('click', ()=>{ currentCat = el.dataset.key; renderAll(); });
+    });
+  }
+
+  function renderPanel(){
+    const cat = CATEGORIES.find(c=>c.key===currentCat);
+    document.getElementById('panelTitle').textContent = cat.label;
+    document.getElementById('panelSub').textContent = cat.sub;
+
+    const items = masterData[currentCat] || [];
+    if(items.length === 0){
+      itemListEl.innerHTML = '';
+      emptyStateEl.style.display = 'block';
+      return;
+    }
+    emptyStateEl.style.display = 'none';
+    itemListEl.innerHTML = items.map((it, idx) => `
+      <div class="item-row" data-id="${it.id||''}" data-index="${idx}">
+        <span class="drag">⠿</span>
+        <span class="val">${escapeHtml(it.value)}</span>
+        <input class="edit-input" type="text" value="${escapeHtml(it.value)}">
+        <button class="icon-btn edit-btn" title="แก้ไข">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20h4L18.5 9.5a1.5 1.5 0 0 0 0-2.1l-1.9-1.9a1.5 1.5 0 0 0-2.1 0L4 15v5Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="icon-btn save-btn" title="บันทึก" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn danger delete-btn" title="ลบ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7h14Z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+      </div>`).join('');
+
+    itemListEl.querySelectorAll('.item-row').forEach(row=>{
+      const idx = parseInt(row.dataset.index,10);
+      const item = items[idx];
+      row.querySelector('.edit-btn').addEventListener('click', ()=>{
+        row.classList.add('editing');
+        row.querySelector('.edit-btn').style.display='none';
+        row.querySelector('.save-btn').style.display='flex';
+        row.querySelector('.edit-input').focus();
+      });
+      row.querySelector('.save-btn').addEventListener('click', ()=> commitEdit(row, item));
+      row.querySelector('.edit-input').addEventListener('keydown', e=>{
+        if(e.key==='Enter') commitEdit(row, item);
+      });
+      row.querySelector('.delete-btn').addEventListener('click', ()=> deleteItem(item));
+    });
+  }
+
+  function renderAll(){ renderSidebar(); renderPanel(); }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  async function commitEdit(row, item){
+    const newVal = row.querySelector('.edit-input').value.trim();
+    if(!newVal){ showToast('กรุณากรอกข้อความ', false); return; }
+    const ok = await saveItem({ id: item.id, category: currentCat, value: newVal });
+    if(ok){ item.value = newVal; renderPanel(); showToast('แก้ไขข้อมูลเรียบร้อยแล้ว'); }
+  }
+
+  async function deleteItem(item){
+    if(!confirm(`ยืนยันการลบ "${item.value}" ออกจากรายการนี้?`)) return;
+    if(!item.id){
+      // รายการค่าเริ่มต้น (ยังไม่เคยถูกบันทึกลง Sheet) — ลบออกจากหน้าจอได้เลย
+      masterData[currentCat] = masterData[currentCat].filter(i => i !== item);
+      renderAll(); showToast('ลบรายการเรียบร้อยแล้ว'); return;
+    }
+    try{
+      const res = await fetch(API_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'deleteMasterItem', id:item.id, token: ADMIN_TOKEN })
+      });
+      const data = await res.json();
+      if(data.success){
+        masterData[currentCat] = masterData[currentCat].filter(i => i.id !== item.id);
+        renderAll(); showToast('ลบรายการเรียบร้อยแล้ว');
+      } else { showToast(data.message || 'ลบรายการไม่สำเร็จ', false); }
+    }catch(err){ showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', false); }
+  }
+
+  async function saveItem(payload){
+    try{
+      const res = await fetch(API_URL, {
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'saveMasterItem', token: ADMIN_TOKEN, ...payload })
+      });
+      const data = await res.json();
+      if(!data.success) showToast(data.message || 'บันทึกไม่สำเร็จ', false);
+      return data.success;
+    }catch(err){ showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต', false); return false; }
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', addNewItem);
+  document.getElementById('newItemInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addNewItem(); });
+
+  async function addNewItem(){
+    const input = document.getElementById('newItemInput');
+    const value = input.value.trim();
+    if(!value){ showToast('กรุณากรอกค่าที่ต้องการเพิ่มก่อน', false); return; }
+    const dup = (masterData[currentCat]||[]).some(i => i.value === value);
+    if(dup){ showToast('มีรายการนี้อยู่แล้วในหมวดหมู่นี้', false); return; }
+
+    const res = await fetch(API_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'saveMasterItem', category: currentCat, value, token: ADMIN_TOKEN })
+    }).then(r=>r.json()).catch(()=>({success:false, message:'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'}));
+
+    if(res.success){
+      if(!masterData[currentCat]) masterData[currentCat] = [];
+      masterData[currentCat].push({ id: res.id || '', value });
+      input.value = '';
+      renderAll();
+      showToast('เพิ่มรายการเรียบร้อยแล้ว');
+    } else {
+      showToast(res.message || 'เพิ่มรายการไม่สำเร็จ', false);
+    }
+  }
+
+  function showToast(msg, success=true){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.background = success ? '#12213D' : '#E5484D';
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2800);
+  }
+
+  // ---------- โหลดข้อมูลจริงจาก Google Sheets ----------
+  async function loadMasterData(){
+    try{
+      const res = await fetch(`${API_URL}?action=getMasterData`);
+      if(!res.ok) throw new Error('network');
+      const data = await res.json();
+      if(data.success && data.data && data.data.items){
+        masterData = data.data.items;
+      } else {
+        throw new Error('invalid response');
+      }
+    }catch(err){
+      console.warn('ไม่สามารถโหลด Master Data จริงได้ ใช้ข้อมูลตัวอย่างแทน (โปรดตั้งค่า API_URL)', err);
+      masterData = {
+        years:[{id:'',value:'2567'},{id:'',value:'2568'},{id:'',value:'2569'}],
+        departments:["ช่างยนต์","ช่างไฟฟ้า","ช่างกลโรงงาน","ช่างเชื่อมโลหะ","ช่างก่อสร้าง","ช่างอิเล็กทรอนิกส์","เมคคาทรอนิกส์","ยานยนต์ไฟฟ้า","สถาปัตยกรรม","การโรงแรม","การบัญชี","การตลาด","เทคโนโลยีธุรกิจดิจิทัล"].map(v=>({id:'',value:v})),
+        majors:[], eduLevels:[{id:'',value:'ปวช.'},{id:'',value:'ปวส.'}],
+        eduStatuses:["กำลังศึกษา","สำเร็จการศึกษา","พักการศึกษา","ลาออก","พ้นสภาพ"].map(v=>({id:'',value:v})),
+        chinaSchools:["Guangxi Vocational College","Yunnan College of Business","Chengdu Polytechnic"].map(v=>({id:'',value:v})),
+        provinces:[], countries:[{id:'',value:'ไทย'},{id:'',value:'จีน'}], curricula:[], cohorts:[], classrooms:[]
+      };
+    }
+    renderAll();
+  }
+  loadMasterData();
+</script>
+</body>
+</html>

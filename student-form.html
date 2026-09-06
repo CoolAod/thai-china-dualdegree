@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เพิ่ม/แก้ไขข้อมูลนักเรียน | ระบบทวิวุฒิ ไทย–จีน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B3E8F; --blue-700:#2563EB; --blue-600:#3B82F6; --cyan-400:#38BDF8;
+    --indigo-500:#4F46E5; --sky-50:#F3F7FF; --sky-100:#EAF1FF;
+    --ink-900:#12213D; --ink-600:#4C5C77; --ink-400:#8494AC; --line:#E1E9F7;
+    --white:#fff; --green:#22C08D; --red-500:#E5484D; --red-50:#FDECEC; --green-50:#E9F9F2;
+    --radius-lg:20px; --radius-md:14px;
+    --shadow-soft:0 10px 30px -12px rgba(23,60,140,.18); --shadow-tiny:0 4px 14px -6px rgba(23,60,140,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Prompt','Sarabun',sans-serif; color:var(--ink-900); min-height:100vh;
+    background:radial-gradient(1200px 600px at 100% -10%, #E9F1FF 0%, transparent 60%), var(--sky-50);
+  }
+  .app{max-width:1100px;margin:0 auto;padding:24px 24px 70px;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:700;}
+  .topbar p{font-size:12.5px;color:var(--ink-400);margin:3px 0 0;}
+  .btn{
+    font-family:inherit;font-weight:600;font-size:13.5px;border:none;border-radius:11px;
+    padding:11px 20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn-ghost{background:var(--sky-100);color:var(--ink-600);}
+  .btn-primary{background:linear-gradient(135deg,var(--blue-700),var(--indigo-500));color:#fff;
+    box-shadow:0 10px 22px -8px rgba(37,99,235,.5);}
+  .btn-primary:disabled{opacity:.65;cursor:progress;}
+  .top-actions{display:flex;gap:10px;}
+
+  /* Stepper tabs */
+  .tabs{
+    display:flex;gap:8px;background:#fff;border-radius:16px;padding:8px;
+    box-shadow:var(--shadow-tiny);margin-bottom:20px;overflow-x:auto;
+  }
+  .tab{
+    flex:1;min-width:150px;text-align:center;padding:12px 10px;border-radius:11px;cursor:pointer;
+    font-size:13px;font-weight:600;color:var(--ink-400);display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .tab .tnum{
+    width:20px;height:20px;border-radius:50%;background:var(--sky-100);color:var(--ink-400);
+    font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .tab.active{background:linear-gradient(135deg,var(--blue-700),var(--cyan-400));color:#fff;}
+  .tab.active .tnum{background:rgba(255,255,255,.28);color:#fff;}
+  .tab.done .tnum{background:var(--green);color:#fff;}
+
+  .panel{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:28px 30px;display:none;}
+  .panel.active{display:block;}
+  .panel h2{font-size:15.5px;margin:0 0 4px;font-weight:700;}
+  .panel p.sub{font-size:12.5px;color:var(--ink-400);margin:0 0 24px;}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .grid.cols2{grid-template-columns:repeat(2,1fr);}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.span2{grid-column:span 2;}
+  .field.span3{grid-column:span 3;}
+  label{font-size:12px;font-weight:500;color:var(--ink-600);}
+  label .req{color:var(--red-500);margin-left:2px;}
+  input,select,textarea{
+    font-family:inherit;font-size:13.5px;color:var(--ink-900);
+    border:1.6px solid var(--line);border-radius:10px;padding:10px 12px;
+    background:var(--sky-50); outline:none; width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--blue-600); box-shadow:0 0 0 4px rgba(59,130,246,.13);}
+  textarea{resize:vertical;min-height:70px;}
+  .err-msg{font-size:11px;color:var(--red-500);display:none;}
+  .field.invalid input, .field.invalid select{border-color:var(--red-500); background:var(--red-50);}
+  .field.invalid .err-msg{display:block;}
+  #codeCheckMsg.warn{color:var(--red-500);}
+  #codeCheckMsg.ok{color:var(--green);}
+  #codeCheckMsg.checking{color:var(--ink-400);}
+
+  .photo-upload{
+    display:flex;align-items:center;gap:16px;grid-column:span 3;
+    background:var(--sky-50);border:1.6px dashed var(--line);border-radius:14px;padding:16px;
+  }
+  .photo-preview{
+    width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--blue-600),var(--cyan-400));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:22px;flex-shrink:0;
+    overflow:hidden;
+  }
+  .photo-preview img{width:100%;height:100%;object-fit:cover;}
+  .photo-upload .info{font-size:12px;color:var(--ink-400);}
+  .photo-upload .info b{color:var(--ink-900);font-size:13px;display:block;margin-bottom:3px;}
+  .file-btn{
+    background:#fff;border:1.6px solid var(--line);border-radius:9px;padding:8px 14px;
+    font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue-700);cursor:pointer;
+  }
+
+  .section-divider{grid-column:1/-1;border-top:1px solid var(--line);margin:6px 0 4px;padding-top:16px;}
+  .section-divider h3{font-size:13px;margin:0 0 2px;font-weight:600;color:var(--blue-700);}
+  .section-divider p{font-size:11.5px;color:var(--ink-400);margin:0;}
+
+  .nav-buttons{display:flex;justify-content:space-between;margin-top:26px;}
+  .badge-flag{
+    display:inline-flex;align-items:center;gap:6px;background:var(--green-50);color:#1AA179;
+    font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:20px;margin-left:10px;
+  }
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink-900);color:#fff;padding:13px 22px;border-radius:12px;font-size:13.5px;
+    box-shadow:0 14px 30px -10px rgba(0,0,0,.35); opacity:0; pointer-events:none;transition:all .25s ease;
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:760px){
+    .grid, .grid.cols2{grid-template-columns:1fr;}
+    .field.span2, .field.span3{grid-column:span 1;}
+    .panel{padding:20px;}
+    .tabs{flex-wrap:wrap;}
+    .tab{min-width:44%;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <h1 id="formTitle">เพิ่มข้อมูลนักเรียน–นักศึกษา</h1>
+      <p>กรอกข้อมูลให้ครบทั้ง 4 ส่วน ระบบจะบันทึกลง Google Sheets โดยอัตโนมัติ</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-ghost" onclick="location.href='dashboard.html'">ยกเลิก</button>
+      <button class="btn btn-primary" id="saveBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        บันทึกข้อมูล
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="1"><span class="tnum">1</span> ข้อมูลพื้นฐาน</div>
+    <div class="tab" data-tab="2"><span class="tnum">2</span> ข้อมูลการศึกษา</div>
+    <div class="tab" data-tab="3"><span class="tnum">3</span> ทวิวุฒิ (ไทย)</div>
+    <div class="tab" data-tab="4"><span class="tnum">4</span> ทวิวุฒิ (จีน)</div>
+  </div>
+
+  <form id="studentForm" novalidate>
+
+    <!-- Panel 1: ข้อมูลพื้นฐาน -->
+    <div class="panel active" data-panel="1">
+      <h2>ข้อมูลพื้นฐาน</h2>
+      <p class="sub">ข้อมูลส่วนตัวของนักเรียน–นักศึกษา</p>
+      <div class="grid">
+        <div class="photo-upload">
+          <div class="photo-preview" id="photoPreview">รูป</div>
+          <div class="info">
+            <b>รูปภาพนักเรียน</b>
+            <span id="photoStatusText">ไฟล์ JPG/PNG ขนาดไม่เกิน 2MB — อัปโหลดขึ้น Google Drive ทันทีที่เลือกไฟล์</span>
+            <div style="margin-top:8px;"><label class="file-btn" for="photoInput">เลือกไฟล์รูปภาพ</label></div>
+            <input type="file" id="photoInput" accept="image/*" style="display:none;">
+            <input type="hidden" id="photoUrl" value="">
+          </div>
+        </div>
+
+        <div class="field"><label>รหัสนักเรียน/นักศึกษา<span class="req">*</span></label>
+          <input type="text" id="studentCode" placeholder="เช่น 64301010" required>
+          <span class="err-msg">กรุณากรอกรหัสนักเรียน</span>
+          <span id="codeCheckMsg" style="font-size:11px;margin-top:2px;display:none;"></span>
+        </div>
+        <div class="field"><label>เลขประจำตัวประชาชน<span id="nationalIdReq" class="req">*</span></label>
+          <input type="text" id="nationalId" maxlength="13" placeholder="เลข 13 หลัก" required>
+          <span class="err-msg">กรุณากรอกเลขประจำตัวให้ครบ 13 หลัก</span>
+        </div>
+        <div class="field"><label>คำนำหน้า<span class="req">*</span></label>
+          <select id="prefix" required><option value="">เลือก</option><option>นาย</option><option>นางสาว</option><option>นาง</option></select>
+          <span class="err-msg">กรุณาเลือกคำนำหน้า</span>
+        </div>
+
+        <div class="field"><label>ชื่อ<span class="req">*</span></label>
+          <input type="text" id="firstName" required><span class="err-msg">กรุณากรอกชื่อ</span></div>
+        <div class="field"><label>นามสกุล<span class="req">*</span></label>
+          <input type="text" id="lastName" required><span class="err-msg">กรุณากรอกนามสกุล</span></div>
+        <div class="field"><label>ชื่อภาษาอังกฤษ</label><input type="text" id="englishName" placeholder="Firstname Lastname"></div>
+
+        <div class="field"><label>เพศ<span class="req">*</span></label>
+          <select id="gender" required><option value="">เลือก</option><option>ชาย</option><option>หญิง</option></select>
+          <span class="err-msg">กรุณาเลือกเพศ</span></div>
+        <div class="field"><label>วันเดือนปีเกิด<span class="req">*</span></label>
+          <input type="date" id="birthDate" required><span class="err-msg">กรุณาเลือกวันเกิด</span></div>
+        <div class="field"><label>เบอร์โทรศัพท์</label><input type="tel" id="phone" placeholder="08X-XXX-XXXX"></div>
+
+        <div class="field"><label>Email</label><input type="email" id="email" placeholder="name@example.com"></div>
+        <div class="field span2"><label>ที่อยู่</label><input type="text" id="address" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></div>
+      </div>
+    </div>
+
+    <!-- Panel 2: ข้อมูลการศึกษา -->
+    <div class="panel" data-panel="2">
+      <h2>ข้อมูลการศึกษา</h2>
+      <p class="sub">ข้อมูลการลงทะเบียนเรียนในวิทยาลัย</p>
+      <div class="grid">
+        <div class="field"><label>ปีการศึกษา<span class="req">*</span></label>
+          <select id="eduYear" required><option value="">เลือก</option><option>2567</option><option>2568</option><option>2569</option></select>
+          <span class="err-msg">กรุณาเลือกปีการศึกษา</span></div>
+        <div class="field"><label>ระดับการศึกษา<span class="req">*</span></label>
+          <select id="eduLevel" required><option value="">เลือก</option><option>ปวช.</option><option>ปวส.</option></select>
+          <span class="err-msg">กรุณาเลือกระดับการศึกษา</span></div>
+        <div class="field"><label>ประเภทผู้เรียน<span class="req">*</span></label>
+          <select id="learnerType" required><option value="">เลือก</option><option>ปกติ</option><option>ทวิภาคี</option><option>ทวิวุฒิ</option></select>
+          <span class="err-msg">กรุณาเลือกประเภทผู้เรียน</span></div>
+
+        <div class="field"><label>แผนกวิชา<span class="req">*</span></label>
+          <select id="department" required>
+            <option value="">เลือก</option>
+            <option>ช่างยนต์</option><option>ช่างไฟฟ้า</option><option>ช่างกลโรงงาน</option>
+            <option>ช่างเชื่อมโลหะ</option><option>ช่างก่อสร้าง</option><option>ช่างอิเล็กทรอนิกส์</option>
+            <option>เมคคาทรอนิกส์</option><option>ยานยนต์ไฟฟ้า</option><option>สถาปัตยกรรม</option>
+            <option>การโรงแรม</option><option>การบัญชี</option><option>การตลาด</option>
+            <option>เทคโนโลยีธุรกิจดิจิทัล</option>
+          </select><span class="err-msg">กรุณาเลือกแผนกวิชา</span></div>
+        <div class="field"><label>สาขาวิชา<span class="req">*</span></label>
+          <input type="text" id="major" required><span class="err-msg">กรุณากรอกสาขาวิชา</span></div>
+        <div class="field"><label>ห้องเรียน</label><input type="text" id="classroom" placeholder="เช่น ปวช.1/2"></div>
+
+        <div class="field"><label>รุ่น</label><input type="text" id="cohort" placeholder="เช่น รุ่น 14"></div>
+        <div class="field"><label>กลุ่มเรียน</label><input type="text" id="learnGroup"></div>
+        <div class="field"><label>วันที่เข้าศึกษา</label><input type="date" id="admissionDate"></div>
+
+        <div class="field"><label>สถานะการศึกษา<span class="req">*</span></label>
+          <select id="eduStatus" required>
+            <option value="">เลือก</option>
+            <option>กำลังศึกษา</option><option>สำเร็จการศึกษา</option><option>พักการศึกษา</option>
+            <option>ลาออก</option><option>พ้นสภาพ</option>
+          </select><span class="err-msg">กรุณาเลือกสถานะ</span></div>
+      </div>
+    </div>
+
+    <!-- Panel 3: ทวิวุฒิไทย -->
+    <div class="panel" data-panel="3">
+      <h2>ข้อมูลทวิวุฒิ — ฝั่งประเทศไทย</h2>
+      <p class="sub">กรอกเฉพาะกรณีที่นักเรียนอยู่ในโครงการทวิวุฒิไทย–จีน</p>
+      <div class="grid">
+        <div class="field span3"><label>สถานศึกษาไทย</label><input type="text" id="thSchool" placeholder="เช่น วิทยาลัยเทคนิคประจวบคีรีขันธ์"></div>
+        <div class="field"><label>แผนกวิชา (ทวิวุฒิ)</label><input type="text" id="thDept"></div>
+        <div class="field"><label>สาขาวิชา (ทวิวุฒิ)</label><input type="text" id="thMajor"></div>
+        <div class="field"><label>ระดับการศึกษา</label>
+          <select id="thLevel"><option value="">เลือก</option><option>ปวช.</option><option>ปวส.</option></select></div>
+
+        <div class="field"><label>วันที่เริ่มเรียน</label><input type="date" id="thStartDate"></div>
+        <div class="field"><label>วันที่จบ</label><input type="date" id="thEndDate"></div>
+        <div class="field"><label>ปีการศึกษา</label>
+          <select id="thYear"><option value="">เลือก</option><option>2567</option><option>2568</option><option>2569</option></select></div>
+
+        <div class="field span3"><label>คุณวุฒิที่ได้รับ</label><input type="text" id="thQualification" placeholder="เช่น ประกาศนียบัตรวิชาชีพ (ปวช.) สาขา..."></div>
+      </div>
+    </div>
+
+    <!-- Panel 4: ทวิวุฒิจีน -->
+    <div class="panel" data-panel="4">
+      <h2>ข้อมูลทวิวุฒิ — ฝั่งประเทศจีน</h2>
+      <p class="sub">ข้อมูลสถานศึกษาและหลักสูตรฝั่งประเทศจีน</p>
+      <div class="grid">
+        <div class="field"><label>ประเทศ</label><input type="text" id="cnCountry" value="สาธารณรัฐประชาชนจีน"></div>
+        <div class="field"><label>มณฑล/เมือง</label><input type="text" id="cnProvince" placeholder="เช่น กว่างซี, ยูนนาน"></div>
+        <div class="field"><label>รูปแบบการศึกษา</label>
+          <select id="cnFormat"><option value="">เลือก</option><option>เรียนที่จีนเต็มเวลา</option><option>เรียนออนไลน์</option><option>ผสมผสาน (Hybrid)</option></select></div>
+
+        <div class="field span2"><label>ชื่อสถานศึกษา (English)</label><input type="text" id="cnSchoolEn" placeholder="เช่น Guangxi Vocational College"></div>
+        <div class="field"><label>ชื่อสถานศึกษา (ภาษาจีน)</label><input type="text" id="cnSchoolZh" placeholder="例：广西职业学院"></div>
+
+        <div class="field"><label>คณะ</label><input type="text" id="cnFaculty"></div>
+        <div class="field"><label>สาขาวิชา (English)</label><input type="text" id="cnMajorEn"></div>
+        <div class="field"><label>สาขาวิชา (ภาษาจีน)</label><input type="text" id="cnMajorZh"></div>
+
+        <div class="field"><label>วันที่เริ่มเรียน</label><input type="date" id="cnStartDate"></div>
+        <div class="field"><label>วันที่จบ</label><input type="date" id="cnEndDate"></div>
+        <div class="field"><label>รหัสหลักสูตร/โครงการ</label><input type="text" id="cnProgramCode" placeholder="เช่น TC-CN-2569-014"></div>
+
+        <div class="field span3"><label>คุณวุฒิที่ได้รับ</label><input type="text" id="cnQualification" placeholder="ชื่อวุฒิการศึกษาที่ได้รับจากฝั่งจีน"></div>
+        <div class="field span3"><label>ชื่อหลักสูตร (ไทย / English / 中文)</label><textarea id="cnCurriculumNames" placeholder="ระบุชื่อหลักสูตรทั้ง 3 ภาษา คั่นด้วยเครื่องหมาย /"></textarea></div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" class="btn btn-ghost" id="prevBtn" style="visibility:hidden;">‹ ย้อนกลับ</button>
+      <button type="button" class="btn btn-primary" id="nextBtn">ถัดไป ›</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#22C08D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span id="toastMsg">บันทึกข้อมูลเรียบร้อยแล้ว</span>
+</div>
+
+<script>
+  // ---------- ตั้งค่า backend ----------
+  const API_URL = "https://script.google.com/macros/s/AKfycbwnUh4ERuWSC5z71mu_-9Z1qS6T19aF1rKWa77oQ_NDQozclctciIPBnGReNJ8q1LagSg/exec";
+  const ADMIN_TOKEN = sessionStorage.getItem('tc_admin_token') || '';
+  const ADMIN_NAME = sessionStorage.getItem('tc_admin_name') || 'ผู้ดูแลระบบ';
+
+  // ป้องกันการเข้าถึงหน้านี้โดยไม่ได้ล็อกอิน (จะไม่มี token ให้แนบตอนบันทึก และ Code.gs จะปฏิเสธอยู่ดี
+  // แต่เช็คตั้งแต่ฝั่งหน้าเว็บเพื่อประสบการณ์ใช้งานที่ดีกว่า)
+  if(!ADMIN_TOKEN){
+    console.warn('ยังไม่พบ session ผู้ดูแลระบบ — การบันทึกข้อมูลจะถูกปฏิเสธจาก backend จนกว่าจะเข้าสู่ระบบที่ login.html');
+  }
+
+  // ---------- โหมดของฟอร์ม: ?code=รหัสนักเรียน -> แก้ไข, ไม่มี -> เพิ่มใหม่ ----------
+  const urlParams = new URLSearchParams(location.search);
+  const editCode = urlParams.get('code');
+  const isEditMode = !!editCode;
+  let codeExists = false; // ผลเช็คซ้ำล่าสุด (ใช้ป้องกันการบันทึกทับ)
+
+  const tabs = [...document.querySelectorAll('.tab')];
+  const panels = [...document.querySelectorAll('.panel')];
+  let current = 1;
+
+  function goTo(n){
+    current = n;
+    tabs.forEach(t=>{
+      const i = parseInt(t.dataset.tab,10);
+      t.classList.toggle('active', i===n);
+      t.classList.toggle('done', i<n);
+    });
+    panels.forEach(p=> p.classList.toggle('active', parseInt(p.dataset.panel,10)===n));
+    document.getElementById('prevBtn').style.visibility = n===1 ? 'hidden' : 'visible';
+    document.getElementById('nextBtn').textContent = n===4 ? 'ตรวจทานและบันทึก ✓' : 'ถัดไป ›';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  tabs.forEach(t => t.addEventListener('click', ()=> goTo(parseInt(t.dataset.tab,10))));
+
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(!validatePanel(current)) return;
+    if(current < 4){ goTo(current+1); } else { submitForm(); }
+  });
+  document.getElementById('prevBtn').addEventListener('click', ()=> goTo(Math.max(1,current-1)));
+
+  // ---------- Safe element check helper (ป้องกัน null reference) ----------
+  function $(id){ return document.getElementById(id) || null; }
+
+  // ---------- Validation แบบง่าย เฉพาะฟิลด์ที่จำเป็น (required) ในแต่ละหน้า ----------
+  function validatePanel(n){
+    const panel = document.querySelector(`.panel[data-panel="${n}"]`);
+    if(!panel) return true;
+    let ok = true;
+    panel.querySelectorAll('[required]').forEach(inputEl=>{
+      const field = inputEl.closest('.field');
+      const isEmpty = !inputEl.value || !inputEl.value.trim();
+      if(field){
+        field.classList.toggle('invalid', isEmpty);
+      }
+      if(isEmpty) ok = false;
+    });
+    // ถ้าเป็นโหมด "เพิ่มใหม่" และรหัสนักเรียนซ้ำกับที่มีอยู่แล้ว ห้ามผ่านหน้าข้อมูลพื้นฐานไปต่อ
+    if(n === 1 && !isEditMode && codeExists){
+      ok = false;
+      showToast('รหัสนักเรียนนี้มีอยู่แล้วในระบบ กรุณาเปลี่ยนรหัส หรือไปแก้ไขข้อมูลนักเรียนคนนั้นแทน', false);
+    }
+    if(!ok && !(n===1 && !isEditMode && codeExists)){
+      showToast('กรุณากรอกข้อมูลที่จำเป็น (*) ให้ครบก่อนไปต่อ', false);
+    }
+    return ok;
+  }
+
+  // =====================================================================
+  //  เช็ครหัสนักเรียนซ้ำก่อนบันทึก (เฉพาะโหมด "เพิ่มใหม่")
+  // =====================================================================
+  let codeCheckTimer = null;
+  function setCodeCheckMsg(text, cls){
+    const el = $('codeCheckMsg');
+    if(!el) return;
+    el.textContent = text;
+    el.className = cls || '';
+    el.style.display = text ? 'block' : 'none';
+  }
+
+  async function checkStudentCodeNow(code){
+    if(!code){ codeExists = false; setCodeCheckMsg('', ''); return; }
+    setCodeCheckMsg('กำลังตรวจสอบรหัสนักเรียน...', 'checking');
+    try{
+      const res = await fetch(`${API_URL}?action=checkStudentCode&studentCode=${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if(data.success && data.exists){
+        codeExists = true;
+        setCodeCheckMsg(`⚠ รหัสนี้มีอยู่แล้ว: ${escapeHtml(data.name||'')} (${escapeHtml(data.department||'')}) — ใช้รหัสอื่น หรือแก้ไขจากหน้าโปรไฟล์นักเรียนคนนั้นแทน`, 'warn');
+      } else {
+        codeExists = false;
+        setCodeCheckMsg('✓ รหัสนี้ยังไม่ถูกใช้งาน', 'ok');
+      }
+    }catch(err){
+      codeExists = false; // เชื่อมต่อไม่ได้ ไม่บล็อกผู้ใช้ แต่ backend จะเช็คซ้ำอีกชั้นตอนบันทึกอยู่ดี
+      setCodeCheckMsg('', '');
+    }
+  }
+
+  if(!isEditMode){
+    const codeInput = $('studentCode');
+    if(codeInput){
+      codeInput.addEventListener('input', ()=>{
+        clearTimeout(codeCheckTimer);
+        const code = codeInput.value.trim();
+        codeCheckTimer = setTimeout(()=> checkStudentCodeNow(code), 500);
+      });
+    }
+  }
+
+  // ---------- ป้องกัน XSS เวลาแทรกข้อความที่มาจากฐานข้อมูล/ผู้ใช้ลงใน innerHTML ----------
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // =====================================================================
+  //  โหมดแก้ไข: โหลดข้อมูลเดิมมาเติมในฟอร์ม
+  // =====================================================================
+  async function loadForEdit(){
+    $('formTitle').textContent = 'แก้ไขข้อมูลนักเรียน–นักศึกษา';
+    const codeInput = $('studentCode');
+    if(codeInput){ codeInput.value = editCode; codeInput.readOnly = true; codeInput.style.background = '#EEF2F8'; }
+
+    // ฟิลด์อ่อนไหว (nationalId/phone/email/address) จะไม่ถูกส่งกลับมาจาก backend เลย (NEVER_EXPORT_FIELDS)
+    // ปรับ placeholder ให้ชัดเจนว่า "เว้นว่างไว้ = ไม่เปลี่ยนแปลงข้อมูลเดิม"
+    const keepMsg = '(มีข้อมูลเดิมอยู่แล้ว — เว้นว่างไว้เพื่อไม่เปลี่ยนแปลง)';
+    ['nationalId','phone','email','address'].forEach(id=>{
+      const el = $(id);
+      if(el){ el.placeholder = keepMsg; el.required = false; }
+    });
+    const nReq = $('nationalIdReq'); if(nReq) nReq.style.display = 'none';
+
+    try{
+      const res = await fetch(`${API_URL}?action=getStudent&id=${encodeURIComponent(editCode)}&token=${encodeURIComponent(ADMIN_TOKEN)}`);
+      const data = await res.json();
+      if(!data.success || !data.student){ showToast(data.message || 'ไม่พบข้อมูลนักเรียนรหัสนี้', false); return; }
+      const s = data.student;
+      Object.keys(s).forEach(key=>{
+        const el = $(key);
+        if(el && el.tagName !== undefined && key !== 'studentCode'){ el.value = s[key] || ''; }
+      });
+    }catch(err){
+      showToast('ไม่สามารถโหลดข้อมูลเดิมได้ กรุณาตรวจสอบการเชื่อมต่อ', false);
+    }
+  }
+  if(isEditMode) loadForEdit();
+
+  // =====================================================================
+  //  อัปโหลดรูปภาพไป Google Drive ทันทีที่เลือกไฟล์
+  // =====================================================================
+  const photoInput = $('photoInput');
+  if(photoInput){
+    photoInput.addEventListener('change', (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      if(file.size > 2*1024*1024){ showToast('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 2MB', false); return; }
+      if(!ADMIN_TOKEN){ showToast('กรุณาเข้าสู่ระบบก่อนอัปโหลดรูปภาพ', false); return; }
+
+      const reader = new FileReader();
+      reader.onload = async ev=>{
+        const preview = $('photoPreview');
+        const statusText = $('photoStatusText');
+        if(preview) preview.innerHTML = `<img src="${ev.target.result}" alt="รูปนักเรียน">`;
+        if(statusText) statusText.textContent = 'กำลังอัปโหลดขึ้น Google Drive...';
+
+        try{
+          const res = await fetch(API_URL, {
+            method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+            body: JSON.stringify({
+              action:'uploadPhoto', token: ADMIN_TOKEN,
+              studentCode: $('studentCode') ? $('studentCode').value.trim() : '',
+              fileName: file.name, base64Data: ev.target.result
+            })
+          });
+          const data = await res.json();
+          if(data.success){
+            $('photoUrl').value = data.photoUrl;
+            if(statusText) statusText.textContent = 'อัปโหลดรูปภาพขึ้น Google Drive เรียบร้อยแล้ว ✓';
+            showToast('อัปโหลดรูปภาพเรียบร้อยแล้ว', true);
+          } else {
+            if(statusText) statusText.textContent = 'อัปโหลดไม่สำเร็จ — ' + (data.message || '');
+            showToast(data.message || 'อัปโหลดรูปภาพไม่สำเร็จ', false);
+          }
+        }catch(err){
+          if(statusText) statusText.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่ออัปโหลดรูปภาพได้';
+          showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต', false);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showToast(msg, success=true){
+    const toast = $('toast');
+    const toastMsg = $('toastMsg');
+    if(!toast || !toastMsg) return;
+    toastMsg.textContent = msg;
+    toast.style.background = success ? '#12213D' : '#E5484D';
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 3200);
+  }
+
+  function collectFormData(){
+    const val = id => ($(id) ? $(id).value : '');
+    return {
+      action: 'saveStudent',
+      token: ADMIN_TOKEN,           // แนบ token ผู้ดูแลระบบเพื่อผ่าน requireAuth_ ใน Code.gs
+      editedBy: ADMIN_NAME,         // บันทึกชื่อผู้แก้ไขลง EditLog
+      isNewRecord: !isEditMode,     // ใช้ให้ backend เช็คซ้ำอีกชั้นก่อนเขียนทับข้อมูลเดิมโดยไม่ตั้งใจ
+      // ข้อมูลพื้นฐาน
+      studentCode: val('studentCode'), nationalId: val('nationalId'), prefix: val('prefix'),
+      firstName: val('firstName'), lastName: val('lastName'), englishName: val('englishName'),
+      gender: val('gender'), birthDate: val('birthDate'), phone: val('phone'),
+      email: val('email'), address: val('address'), photoUrl: val('photoUrl'),
+      // ข้อมูลการศึกษา
+      eduYear: val('eduYear'), eduLevel: val('eduLevel'), learnerType: val('learnerType'),
+      department: val('department'), major: val('major'), classroom: val('classroom'),
+      cohort: val('cohort'), learnGroup: val('learnGroup'), admissionDate: val('admissionDate'),
+      eduStatus: val('eduStatus'),
+      // ทวิวุฒิไทย
+      thSchool: val('thSchool'), thDept: val('thDept'), thMajor: val('thMajor'), thLevel: val('thLevel'),
+      thStartDate: val('thStartDate'), thEndDate: val('thEndDate'), thYear: val('thYear'),
+      thQualification: val('thQualification'),
+      // ทวิวุฒิจีน
+      cnCountry: val('cnCountry'), cnProvince: val('cnProvince'), cnFormat: val('cnFormat'),
+      cnSchoolEn: val('cnSchoolEn'), cnSchoolZh: val('cnSchoolZh'), cnFaculty: val('cnFaculty'),
+      cnMajorEn: val('cnMajorEn'), cnMajorZh: val('cnMajorZh'),
+      cnStartDate: val('cnStartDate'), cnEndDate: val('cnEndDate'), cnProgramCode: val('cnProgramCode'),
+      cnQualification: val('cnQualification'), cnCurriculumNames: val('cnCurriculumNames'),
+    };
+  }
+
+  async function submitForm(){
+    if(!ADMIN_TOKEN){
+      showToast('กรุณาเข้าสู่ระบบผู้ดูแลก่อนบันทึกข้อมูล', false);
+      setTimeout(()=> location.href = 'login.html', 1200);
+      return;
+    }
+    if(!isEditMode && codeExists){
+      showToast('รหัสนักเรียนนี้มีอยู่แล้วในระบบ ไม่สามารถบันทึกซ้ำได้ กรุณาเปลี่ยนรหัส', false);
+      goTo(1);
+      return;
+    }
+    const saveBtn = $('saveBtn');
+    if(saveBtn){ saveBtn.disabled = true; saveBtn.textContent = 'กำลังบันทึก...'; }
+    try{
+      const payload = collectFormData();
+      const res = await fetch(API_URL, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error('network error');
+      const data = await res.json();
+      if(data && data.success){
+        showToast('บันทึกข้อมูลนักเรียนเรียบร้อยแล้ว ✓', true);
+        setTimeout(()=> location.href = `student-profile.html?id=${encodeURIComponent(payload.studentCode)}`, 1200);
+      } else {
+        showToast((data && data.message) || 'บันทึกข้อมูลไม่สำเร็จ กรุณาลองใหม่', false);
+      }
+    } catch(err){
+      showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต', false);
+    } finally {
+      if(saveBtn){ saveBtn.disabled = false; saveBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> บันทึกข้อมูล'; }
+    }
+  }
+
+  $('saveBtn').addEventListener('click', ()=>{
+    if(validatePanel(current)) submitForm();
+  });
+</script>
+</body>
+</html>
