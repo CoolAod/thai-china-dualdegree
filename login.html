@@ -130,9 +130,9 @@
       <h2>ระบบข้อมูลนักเรียน<br>ทวิวุฒิ ไทย–จีน</h2>
       <p>วิทยาลัยเทคนิคประจวบคีรีขันธ์ · สำหรับเจ้าหน้าที่และผู้ดูแลระบบเท่านั้น เข้าสู่ระบบเพื่อจัดการข้อมูลนักเรียนและดูรายงานเชิงลึก</p>
       <div class="stat-row">
-        <div><span>13</span><small>แผนกวิชา</small></div>
-        <div><span>386</span><small>ผู้เรียนทวิวุฒิ</small></div>
-        <div><span>9</span><small>สถานศึกษาจีน</small></div>
+        <div><span id="statDept">–</span><small>แผนกวิชา</small></div>
+        <div><span id="statDual">–</span><small>ผู้เรียนทวิวุฒิ</small></div>
+        <div><span id="statChina">–</span><small>สถานศึกษาจีน</small></div>
       </div>
     </div>
     <div class="brand-foot">© 2569 วิทยาลัยเทคนิคประจวบคีรีขันธ์</div>
@@ -198,6 +198,29 @@
 <script>
   // ตั้งค่า URL ของ Google Apps Script Web App ที่ deploy แล้ว (แทนที่ด้วย URL จริง)
   const API_URL = "https://script.google.com/macros/s/AKfycbxleBpebw7ymr80COOBCAAA6Mwbq_LFkY_oW6BvC3Vo-3tLD4Y7ixaxuFgdF3zeq_Bcnw/exec";
+
+  // ---------- โหลดตัวเลขสรุปจริงจากฐานข้อมูล (แทนตัวเลขตัวอย่างที่เคยฝังไว้ตายตัว) ----------
+  async function loadLoginStats(){
+    try{
+      if(API_URL.includes('XXXXXXXX')) throw new Error('ยังไม่ได้ตั้งค่า API_URL');
+      const res = await fetch(`${API_URL}?action=getDashboardStats`);
+      const data = await res.json();
+      if(!data.success || !data.data) throw new Error(data.message || 'โหลดข้อมูลไม่สำเร็จ');
+      const stats = data.data;
+      const deptCount = stats.byDept ? Object.keys(stats.byDept).length : null;
+      setStat('statDept', deptCount);
+      setStat('statDual', stats.totalDualDegree);
+      setStat('statChina', stats.chinaSchoolCount);
+    }catch(err){
+      // เชื่อมต่อไม่ได้ -> ไม่โชว์ตัวเลขปลอม แสดง "-" แทนดีกว่าโชว์ค่าที่อาจไม่ตรงความจริง
+      console.warn('ไม่สามารถโหลดสถิติจริงได้ในหน้า login:', err.message);
+    }
+  }
+  function setStat(id, value){
+    const el = document.getElementById(id);
+    if(el && value !== null && value !== undefined) el.textContent = value.toLocaleString('th-TH');
+  }
+  loadLoginStats();
 
   const form = document.getElementById('loginForm');
   const btn = document.getElementById('loginBtn');
