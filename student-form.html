@@ -73,6 +73,7 @@
     transition:border-color .15s ease, box-shadow .15s ease;
   }
   input:focus,select:focus,textarea:focus{border-color:var(--blue-600); box-shadow:0 0 0 4px rgba(59,130,246,.13);}
+  input[readonly]{background:#EEF2F8;color:var(--ink-600);cursor:not-allowed;}
   textarea{resize:vertical;min-height:70px;}
   .err-msg{font-size:11px;color:var(--red-500);display:none;}
   .field.invalid input, .field.invalid select{border-color:var(--red-500); background:var(--red-50);}
@@ -267,20 +268,44 @@
     <!-- Panel 3: ทวิวุฒิไทย -->
     <div class="panel" data-panel="3">
       <h2>ข้อมูลทวิวุฒิ — ฝั่งประเทศไทย</h2>
-      <p class="sub">กรอกเฉพาะกรณีที่นักเรียนอยู่ในโครงการทวิวุฒิไทย–จีน</p>
+      <p class="sub">ข้อมูลส่วนใหญ่ดึงมาจาก "ข้อมูลการศึกษา" ในแท็บก่อนหน้าให้อัตโนมัติ ไม่ต้องกรอกซ้ำ</p>
       <div class="grid">
-        <div class="field span3"><label>สถานศึกษาไทย</label><input type="text" id="thSchool" placeholder="เช่น วิทยาลัยเทคนิคประจวบคีรีขันธ์"></div>
-        <div class="field"><label>แผนกวิชา (ทวิวุฒิ)</label><input type="text" id="thDept"></div>
-        <div class="field"><label>สาขาวิชา (ทวิวุฒิ)</label><input type="text" id="thMajor"></div>
-        <div class="field"><label>ระดับการศึกษา</label>
-          <select id="thLevel"><option value="">เลือก</option><option>ปวช.</option><option>ปวส.</option></select></div>
+        <div class="field span3">
+          <label>สถานศึกษาไทย</label>
+          <input type="text" id="thSchool" readonly>
+        </div>
+        <div class="field">
+          <label>แผนกวิชา (ทวิวุฒิ)</label>
+          <input type="text" id="thDept" readonly placeholder="ดึงจากแท็บข้อมูลการศึกษา">
+        </div>
+        <div class="field">
+          <label>สาขาวิชา (ทวิวุฒิ)</label>
+          <input type="text" id="thMajor" readonly placeholder="ดึงจากแท็บข้อมูลการศึกษา">
+        </div>
+        <div class="field">
+          <label>ระดับการศึกษา</label>
+          <input type="text" id="thLevel" readonly placeholder="ดึงจากแท็บข้อมูลการศึกษา">
+        </div>
 
-        <div class="field"><label>วันที่เริ่มเรียน</label><input type="date" id="thStartDate"></div>
-        <div class="field"><label>วันที่จบ</label><input type="date" id="thEndDate"></div>
-        <div class="field"><label>ปีการศึกษา</label>
-          <select id="thYear"><option value="">เลือก</option><option>2567</option><option>2568</option><option>2569</option></select></div>
+        <div class="field">
+          <label>วันที่เริ่มเรียน</label>
+          <input type="date" id="thStartDate" readonly>
+          <span style="font-size:11px;color:var(--ink-400);margin-top:4px;display:block;">ดึงจากวันที่เข้าศึกษาในแท็บข้อมูลการศึกษา</span>
+        </div>
+        <div class="field">
+          <label>วันที่จบ</label>
+          <input type="date" id="thEndDate">
+          <span style="font-size:11px;color:var(--ink-400);margin-top:4px;display:block;">หากยังไม่จบการศึกษา ไม่ต้องกรอก</span>
+        </div>
+        <div class="field">
+          <label>ปีการศึกษา</label>
+          <input type="text" id="thYear" readonly placeholder="ดึงจากแท็บข้อมูลการศึกษา">
+        </div>
 
-        <div class="field span3"><label>คุณวุฒิที่ได้รับ</label><input type="text" id="thQualification" placeholder="เช่น ประกาศนียบัตรวิชาชีพ (ปวช.) สาขา..."></div>
+        <div class="field span3">
+          <label>คุณวุฒิที่ได้รับ</label>
+          <input type="text" id="thQualification" readonly placeholder="คำนวณอัตโนมัติจากระดับการศึกษา + สาขาวิชา">
+        </div>
       </div>
     </div>
 
@@ -466,11 +491,47 @@
         if(el && el.tagName !== undefined && key !== 'studentCode'){ el.value = s[key] || ''; }
       });
       updateGradFieldsVisibility(); // แสดง/ซ่อนช่องข้อมูลหลังจบตามสถานะที่โหลดมา
+      syncThaiDualDegreeFields(); // เติมข้อมูลทวิวุฒิไทยที่ดึงมาจากแท็บข้อมูลการศึกษาให้ตรงกันเสมอ
     }catch(err){
       showToast('ไม่สามารถโหลดข้อมูลเดิมได้ กรุณาตรวจสอบการเชื่อมต่อ', false);
     }
   }
   if(isEditMode) loadForEdit();
+
+  // =====================================================================
+  //  ทวิวุฒิไทย: ลดความซ้ำซ้อน — ดึงแผนก/สาขา/ระดับ/ปีการศึกษา และ "สถานศึกษาไทย"
+  //  มาจากแท็บข้อมูลการศึกษาให้อัตโนมัติ พร้อมคำนวณ "คุณวุฒิที่ได้รับ" ให้เอง
+  // =====================================================================
+  const THAI_SCHOOL_NAME = 'วิทยาลัยเทคนิคประจวบคีรีขันธ์';
+  const QUALIFICATION_BY_LEVEL = {
+    'ปวช.': 'ประกาศนียบัตรวิชาชีพ',
+    'ปวส.': 'ประกาศนียบัตรวิชาชีพชั้นสูง'
+  };
+
+  function syncThaiDualDegreeFields(){
+    const dept = $('department') ? $('department').value : '';
+    const major = $('major') ? $('major').value : '';
+    const level = $('eduLevel') ? $('eduLevel').value : '';
+    const year = $('eduYear') ? $('eduYear').value : '';
+    const admissionDate = $('admissionDate') ? $('admissionDate').value : '';
+
+    if($('thSchool')) $('thSchool').value = THAI_SCHOOL_NAME;
+    if($('thDept')) $('thDept').value = dept;
+    if($('thMajor')) $('thMajor').value = major;
+    if($('thLevel')) $('thLevel').value = level;
+    if($('thYear')) $('thYear').value = year;
+    if($('thStartDate')) $('thStartDate').value = admissionDate;
+
+    const qualBase = QUALIFICATION_BY_LEVEL[level] || '';
+    const qualification = major ? [qualBase, 'สาขาวิชา' + major].filter(Boolean).join(' ') : qualBase;
+    if($('thQualification')) $('thQualification').value = qualification;
+  }
+
+  ['department','major','eduLevel','eduYear','admissionDate'].forEach(id=>{
+    const el = $(id);
+    if(el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', syncThaiDualDegreeFields);
+  });
+  syncThaiDualDegreeFields(); // ตั้งค่าเริ่มต้นตั้งแต่เปิดฟอร์ม (สถานศึกษาไทยต้องมีค่าเสมอแม้ยังไม่ได้กรอกอะไร)
 
   // =====================================================================
   //  แสดง/ซ่อนช่องข้อมูลหลังสำเร็จการศึกษา ตามสถานะที่เลือก
