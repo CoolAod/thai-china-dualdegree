@@ -33,7 +33,7 @@ const SHEETS = {
 const SESSION_TTL_HOURS = 8;
 
 // ใส่ Folder ID ของ Google Drive ที่จะใช้เก็บรูปนักเรียน (เปิดโฟลเดอร์ใน Drive แล้วคัดลอก ID จาก URL)
-const PHOTO_FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE';
+const PHOTO_FOLDER_ID = '1E5xIaAuxV_ZkVGVqkrR_VztiahlahZQW';
 
 // URL ของหน้า reset-password.html หลัง deploy ขึ้นจริงแล้ว (ใช้แนบลิงก์ในอีเมลลืมรหัสผ่าน)
 const RESET_PASSWORD_PAGE_URL = 'https://thaichina.pkc.ac.th/reset-password.html';
