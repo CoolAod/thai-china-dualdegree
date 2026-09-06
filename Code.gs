@@ -76,6 +76,8 @@ function doGet(e) {
         return jsonResponse({ success: true, data: getMasterData_() });
       case 'checkStudentCode':
         return jsonResponse(checkStudentCode_(params.studentCode));
+      case 'getEditLog':
+        return jsonResponse({ success: true, data: getEditLog_(params.studentCode) });
       case 'ping':
         return jsonResponse({ success: true, message: 'pong' });
       default:
@@ -421,6 +423,9 @@ function checkStudentCode_(studentCode) {
   const rows = sheetToObjects_(sheet);
   const found = rows.find(r => String(r.studentCode) === String(studentCode));
   if (!found) return { success: true, exists: false };
+  // แถวที่เกิดจากการอัปโหลดรูปไว้ก่อนตอน "เพิ่มใหม่" แต่ยังไม่เคยกดบันทึกฟอร์ม จะยังไม่มีชื่อ —
+  // ถือว่ายังไม่ใช่ข้อมูลจริง ไม่ควรเตือนว่า "รหัสซ้ำ"
+  if (!found.firstName && !found.lastName) return { success: true, exists: false };
   return {
     success: true,
     exists: true,
@@ -473,11 +478,17 @@ function saveStudent_(payload) {
   // ป้องกันการเขียนทับรหัสนักเรียนที่มีอยู่แล้วโดยไม่ตั้งใจ: ถ้าฟอร์มส่ง forceCreate ไม่มา
   // และเป็นการ "เพิ่มใหม่" (ไม่ใช่แก้ไขที่ตั้งใจ) แต่ดันเจอรหัสซ้ำ ให้ปฏิเสธแล้วแจ้งกลับไป
   // (ฝั่งหน้าเว็บควรเช็คด้วย checkStudentCode_ ก่อนอยู่แล้ว แต่เช็คซ้ำที่นี่กันกรณีเลี่ยงหน้าเว็บมายิง API ตรง)
+  // ข้อยกเว้น: ถ้าแถวที่เจอเป็นแค่ "placeholder" ที่เกิดจากการอัปโหลดรูปไว้ก่อน (ยังไม่มีชื่อ)
+  // ให้ถือว่ายังไม่ใช่ข้อมูลจริง อนุญาตให้บันทึกทับ (เติมข้อมูล) ได้ตามปกติ
   if (isUpdate && payload.isNewRecord === true) {
-    return {
-      success: false,
-      message: 'รหัสนักเรียน "' + payload.studentCode + '" มีอยู่แล้วในระบบ กรุณาใช้รหัสอื่น หรือแก้ไขข้อมูลนักเรียนคนนี้แทนการเพิ่มใหม่'
-    };
+    const existingFirstName = data[rowIndex - 1][headers.indexOf('firstName')];
+    const existingLastName = data[rowIndex - 1][headers.indexOf('lastName')];
+    if (existingFirstName || existingLastName) {
+      return {
+        success: false,
+        message: 'รหัสนักเรียน "' + payload.studentCode + '" มีอยู่แล้วในระบบ กรุณาใช้รหัสอื่น หรือแก้ไขข้อมูลนักเรียนคนนี้แทนการเพิ่มใหม่'
+      };
+    }
   }
 
   const rowValues = headers.map(field => {
@@ -516,6 +527,9 @@ function uploadPhoto_(payload) {
   if (!payload || !payload.base64Data || !payload.fileName) {
     return { success: false, message: 'ข้อมูลไฟล์รูปภาพไม่ครบถ้วน' };
   }
+  if (!payload.studentCode) {
+    return { success: false, message: 'กรุณากรอกรหัสนักเรียนก่อนอัปโหลดรูปภาพ (ใช้อ้างอิงบันทึกลง Google Sheets)' };
+  }
   if (PHOTO_FOLDER_ID === 'YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE') {
     return { success: false, message: 'ยังไม่ได้ตั้งค่า PHOTO_FOLDER_ID ใน Code.gs กรุณาแจ้งผู้ดูแลระบบ' };
   }
@@ -533,7 +547,7 @@ function uploadPhoto_(payload) {
 
     const bytes = Utilities.base64Decode(rawBase64);
     const ext = mimeType.split('/')[1].replace('jpeg', 'jpg');
-    const safeName = (payload.studentCode || 'student').replace(/[^a-zA-Z0-9_-]/g, '');
+    const safeName = payload.studentCode.replace(/[^a-zA-Z0-9_-]/g, '');
     const blob = Utilities.newBlob(bytes, mimeType, safeName + '_' + new Date().getTime() + '.' + ext);
 
     const folder = DriveApp.getFolderById(PHOTO_FOLDER_ID);
@@ -541,29 +555,50 @@ function uploadPhoto_(payload) {
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     const photoUrl = 'https://drive.google.com/uc?export=view&id=' + file.getId();
 
-    // ถ้ามีรหัสนักเรียนอยู่แล้วในชีต ให้อัปเดต photoUrl ให้ทันที (กรณีอัปโหลดรูปตอนแก้ไขข้อมูลที่มีอยู่แล้ว)
-    if (payload.studentCode) updateStudentPhotoUrl_(payload.studentCode, photoUrl);
+    // บันทึกลิงก์รูปภาพลง Google Sheets ทันที (สร้างแถวใหม่ให้เลยถ้ายังไม่มีแถวของนักเรียนคนนี้)
+    updateStudentPhotoUrl_(payload.studentCode, photoUrl);
 
-    return { success: true, photoUrl: photoUrl, fileId: file.getId(), message: 'อัปโหลดรูปภาพเรียบร้อยแล้ว' };
+    return { success: true, photoUrl: photoUrl, fileId: file.getId(), message: 'อัปโหลดรูปภาพและบันทึกลง Google Sheets เรียบร้อยแล้ว' };
   } catch (err) {
     return { success: false, message: 'อัปโหลดรูปภาพไม่สำเร็จ: ' + safeErr_(err) };
   }
 }
 
+/**
+ * บันทึกลิงก์รูปภาพลง Google Sheets ทันทีที่อัปโหลดสำเร็จ
+ * - ถ้ามีแถวของรหัสนักเรียนนี้อยู่แล้ว -> อัปเดต photoUrl (และ updatedAt) ทันที
+ * - ถ้ายังไม่มีแถวเลย (กำลังเพิ่มนักเรียนใหม่ ยังไม่กดบันทึกฟอร์ม) -> สร้างแถวใหม่ไว้ก่อน
+ *   พร้อม photoUrl ทันที เพื่อให้ "อัปโหลดรูปแล้วต้องเห็นใน Google Sheets ทันที" ตามที่ต้องการ
+ *   แถวนี้จะยังไม่มีชื่อ-นามสกุล (เป็น placeholder) จนกว่าจะกดบันทึกฟอร์มทั้งหมด ซึ่งระบบจะรู้จักแถวนี้
+ *   และเติมข้อมูลที่เหลือให้ครบแทนการสร้างแถวซ้ำ (ดู saveStudent_)
+ */
 function updateStudentPhotoUrl_(studentCode, photoUrl) {
-  const sheet = getSheet_(SHEETS.STUDENTS);
-  if (!sheet) return;
+  const sheet = getOrCreateSheet_(SHEETS.STUDENTS, STUDENT_FIELDS);
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   const codeCol = headers.indexOf('studentCode');
   const photoCol = headers.indexOf('photoUrl');
-  if (photoCol === -1) return;
+  if (photoCol === -1) return; // ชีตเก่าที่ยังไม่มีคอลัมน์นี้ — ข้ามไปเงียบๆ ไม่ให้อัปโหลดรูปพัง
+
+  const now = new Date().toISOString();
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][codeCol]) === String(studentCode)) {
       sheet.getRange(i + 1, photoCol + 1).setValue(photoUrl);
-      break;
+      const updatedCol = headers.indexOf('updatedAt');
+      if (updatedCol !== -1) sheet.getRange(i + 1, updatedCol + 1).setValue(now);
+      return;
     }
   }
+
+  // ยังไม่มีแถวของนักเรียนคนนี้เลย -> สร้าง placeholder ไว้ก่อน ให้เห็นใน Google Sheet ทันที
+  const rowValues = headers.map(field => {
+    if (field === 'id') return Utilities.getUuid();
+    if (field === 'studentCode') return studentCode;
+    if (field === 'photoUrl') return photoUrl;
+    if (field === 'createdAt' || field === 'updatedAt') return now;
+    return '';
+  });
+  sheet.appendRow(rowValues);
 }
 
 
@@ -595,6 +630,19 @@ function addEditLog_(studentCode, action, editedBy) {
     // ไม่ให้การบันทึก log ที่ล้มเหลวไปกระทบการทำงานหลัก
     Logger.log('บันทึก edit log ไม่สำเร็จ: ' + safeErr_(err));
   }
+}
+
+/** ดึงประวัติการแก้ไขของนักเรียนคนหนึ่ง (ใหม่สุดก่อน) สำหรับแสดงในหน้าโปรไฟล์ */
+function getEditLog_(studentCode) {
+  if (!studentCode) return [];
+  const sheet = getSheet_(SHEETS.EDIT_LOG);
+  if (!sheet) return [];
+  const rows = sheetToObjects_(sheet);
+  return rows
+    .filter(r => String(r.studentCode) === String(studentCode))
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 20)
+    .map(r => ({ timestamp: r.timestamp, action: r.action, editedBy: r.editedBy }));
 }
 
 // ---------------------------------------------------------------------

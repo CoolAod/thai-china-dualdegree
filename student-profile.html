@@ -151,14 +151,14 @@
       <div class="card">
         <h2><span class="dot"></span>ข้อมูลการศึกษา (ไทย)</h2>
         <div class="info-grid">
-          <div class="info-item"><span>ปีการศึกษา</span><b>2569</b></div>
-          <div class="info-item"><span>ระดับการศึกษา</span><b>ปวช.3</b></div>
-          <div class="info-item"><span>แผนกวิชา</span><b>การโรงแรม</b></div>
-          <div class="info-item"><span>สาขาวิชา</span><b>การโรงแรม</b></div>
-          <div class="info-item"><span>ห้องเรียน / กลุ่มเรียน</span><b>ปวช.3/1 · กลุ่ม A</b></div>
-          <div class="info-item"><span>วันที่เข้าศึกษา</span><b>16 พฤษภาคม 2567</b></div>
+          <div class="info-item"><span>ปีการศึกษา</span><b id="infoEduYear">2569</b></div>
+          <div class="info-item"><span>ระดับการศึกษา</span><b id="infoEduLevel">ปวช.3</b></div>
+          <div class="info-item"><span>แผนกวิชา</span><b id="infoDepartment">การโรงแรม</b></div>
+          <div class="info-item"><span>สาขาวิชา</span><b id="infoMajor">การโรงแรม</b></div>
+          <div class="info-item"><span>ห้องเรียน / กลุ่มเรียน</span><b id="infoClassroom">ปวช.3/1 · กลุ่ม A</b></div>
+          <div class="info-item"><span>วันที่เข้าศึกษา</span><b id="infoAdmissionDate">16 พฤษภาคม 2567</b></div>
           <div class="divider-label">สถานะปัจจุบัน</div>
-          <div class="info-item"><span>สถานะการศึกษา</span><b><span class="status-pill status-studying">กำลังศึกษา</span></b></div>
+          <div class="info-item"><span>สถานะการศึกษา</span><b><span class="status-pill status-studying" id="infoEduStatusPill">กำลังศึกษา</span></b></div>
         </div>
         <div class="info-grid" id="gradInfoGrid" style="display:none;margin-top:14px;">
           <div class="divider-label" style="border-top:1px solid var(--line);padding-top:12px;">ข้อมูลหลังสำเร็จการศึกษา</div>
@@ -172,13 +172,13 @@
       <div class="card">
         <h2><span class="dot"></span>ข้อมูลทวิวุฒิ — ฝั่งประเทศจีน</h2>
         <div class="info-grid">
-          <div class="info-item"><span>สถานศึกษา</span><b>Guangxi Vocational College (广西职业学院)</b></div>
-          <div class="info-item"><span>มณฑล/เมือง</span><b>หนานหนิง, กว่างซี</b></div>
-          <div class="info-item"><span>คณะ / สาขาวิชา</span><b>Hospitality Management (酒店管理)</b></div>
-          <div class="info-item"><span>รูปแบบการศึกษา</span><b>เรียนที่จีนเต็มเวลา</b></div>
-          <div class="info-item"><span>วันที่เริ่ม – วันที่จบ</span><b>1 ก.ย. 2567 – 30 มิ.ย. 2570</b></div>
-          <div class="info-item"><span>รหัสหลักสูตร</span><b>TC-CN-2567-014</b></div>
-          <div class="info-item span2"><span>คุณวุฒิที่คาดว่าจะได้รับ</span><b>ประกาศนียบัตรวิชาชีพชั้นสูง (ทวิวุฒิ) สาขาการโรงแรม</b></div>
+          <div class="info-item"><span>สถานศึกษา</span><b id="infoCnSchool">Guangxi Vocational College (广西职业学院)</b></div>
+          <div class="info-item"><span>มณฑล/เมือง</span><b id="infoCnProvince">หนานหนิง, กว่างซี</b></div>
+          <div class="info-item"><span>คณะ / สาขาวิชา</span><b id="infoCnFaculty">Hospitality Management (酒店管理)</b></div>
+          <div class="info-item"><span>รูปแบบการศึกษา</span><b id="infoCnFormat">เรียนที่จีนเต็มเวลา</b></div>
+          <div class="info-item"><span>วันที่เริ่ม – วันที่จบ</span><b id="infoCnDates">1 ก.ย. 2567 – 30 มิ.ย. 2570</b></div>
+          <div class="info-item"><span>รหัสหลักสูตร</span><b id="infoCnProgramCode">TC-CN-2567-014</b></div>
+          <div class="info-item span2"><span>คุณวุฒิที่คาดว่าจะได้รับ</span><b id="infoCnQualification">ประกาศนียบัตรวิชาชีพชั้นสูง (ทวิวุฒิ) สาขาการโรงแรม</b></div>
         </div>
       </div>
     </div>
@@ -188,7 +188,7 @@
 
       <div class="card">
         <h2><span class="dot"></span>ประวัติการศึกษา / สถานะทวิวุฒิ</h2>
-        <ul class="timeline">
+        <ul class="timeline" id="timelineList">
           <li><div class="t-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             <div class="t-body"><b>เข้าศึกษา ปวช.1 แผนกการโรงแรม</b><span>16 พฤษภาคม 2567</span></div></li>
           <li><div class="t-dot"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -202,7 +202,7 @@
 
       <div class="card">
         <h2><span class="dot"></span>เอกสาร / ไฟล์แนบ</h2>
-        <div class="doc-list">
+        <div class="doc-list" id="docList">
           <div class="doc-item">
             <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v15H6V2Z" stroke="#fff" stroke-width="1.6"/><path d="M14 2v5h5" stroke="#fff" stroke-width="1.6"/></svg></div>
             <div class="doc-info"><b>สำเนาบัตรประชาชน.pdf</b><span>อัปโหลด 12 พ.ค. 2567 · 240 KB</span></div>
@@ -223,17 +223,19 @@
 
       <div class="card">
         <h2><span class="dot"></span>ประวัติการแก้ไขข้อมูล</h2>
-        <div class="log-item">
-          <span>อัปเดตสถานะเป็น "กำลังศึกษา"</span>
-          <span class="who">อ.สมหญิง · 3 ก.ย. 67</span>
-        </div>
-        <div class="log-item">
-          <span>เพิ่มข้อมูลสถานศึกษาจีน</span>
-          <span class="who">อ.สมหญิง · 20 ส.ค. 67</span>
-        </div>
-        <div class="log-item">
-          <span>สร้างระเบียนนักเรียนใหม่</span>
-          <span class="who">แอดมิน · 16 พ.ค. 67</span>
+        <div id="editLogList">
+          <div class="log-item">
+            <span>อัปเดตสถานะเป็น "กำลังศึกษา"</span>
+            <span class="who">อ.สมหญิง · 3 ก.ย. 67</span>
+          </div>
+          <div class="log-item">
+            <span>เพิ่มข้อมูลสถานศึกษาจีน</span>
+            <span class="who">อ.สมหญิง · 20 ส.ค. 67</span>
+          </div>
+          <div class="log-item">
+            <span>สร้างระเบียนนักเรียนใหม่</span>
+            <span class="who">แอดมิน · 16 พ.ค. 67</span>
+          </div>
         </div>
       </div>
     </div>
@@ -242,7 +244,7 @@
 
 <script>
   // ---------- ตั้งค่า backend ----------
-  const API_URL = "https://script.google.com/macros/s/AKfycbzsmHqHOdrpFG_VAkRMw4cjT7whIu76K469UsbnJbR5Z_iScKheSfQO2tpurw0FgLiW8A/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxleBpebw7ymr80COOBCAAA6Mwbq_LFkY_oW6BvC3Vo-3tLD4Y7ixaxuFgdF3zeq_Bcnw/exec";
   const ADMIN_TOKEN = sessionStorage.getItem('tc_admin_token') || '';
 
   // ---------- โหลดข้อมูลจริงตาม ?id= ใน URL (ถ้ามี) ----------
@@ -262,6 +264,7 @@
       const data = await res.json();
       if(data && data.success && data.student){
         renderStudent_(data.student, !!data.authenticated);
+        loadEditLog_(data.student.studentCode || id);
       } else {
         console.warn('ไม่พบข้อมูลนักเรียนรหัสนี้ในระบบ แสดงข้อมูลตัวอย่างแทน');
       }
@@ -275,29 +278,87 @@
     return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
+  /** แปลงวันที่แบบ yyyy-mm-dd (จาก <input type=date>) เป็นข้อความไทย เช่น "16 พฤษภาคม 2567" */
+  function formatThaiDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return String(iso);
+    const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+  }
+
+  function formatThaiDateShort(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return String(iso);
+    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${String(d.getFullYear()+543).slice(-2)}`;
+  }
+
+  function calcAge(birthIso){
+    if(!birthIso) return null;
+    const b = new Date(birthIso);
+    if(isNaN(b.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - b.getFullYear();
+    const hasHadBirthdayThisYear = (now.getMonth() > b.getMonth()) || (now.getMonth() === b.getMonth() && now.getDate() >= b.getDate());
+    if(!hasHadBirthdayThisYear) age--;
+    return age;
+  }
+
   /** ผูกข้อมูลจริงที่โหลดมาลงในการ์ดต่าง ๆ ของหน้าโปรไฟล์ (ป้องกัน null ทุกจุด) */
   function renderStudent_(s, isAuthed){
-    const setText = (sel, val) => { const el = document.querySelector(sel); if(el && val) el.textContent = val; };
+    const setText = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = (val === undefined || val === null || val === '') ? '-' : val; };
+    const setById = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = (val === undefined || val === null || val === '') ? '-' : val; };
     const fullName = `${s.prefix||''}${s.firstName||''} ${s.lastName||''}`.trim();
 
-    setText('.h-info h1', fullName + (s.englishName ? ` (${s.englishName})` : ''));
-    setText('.h-info p', `รหัสนักเรียน ${s.studentCode||'-'} · แผนกวิชา${s.department||'-'} · ${s.eduLevel||''} · ${s.cohort||''}`);
+    setText('.h-info h1', fullName + (s.englishName ? ` (${s.englishName})` : '') || '-');
+    document.querySelector('.h-info p').textContent =
+      `รหัสนักเรียน ${s.studentCode||'-'} · แผนกวิชา${s.department||'-'} · ${s.eduLevel||'-'} · ${s.cohort||'-'}`;
     const avatar = document.getElementById('avatarLg');
     if(avatar) avatar.textContent = ((s.firstName||' ')[0]||'') + ((s.lastName||' ')[0]||'');
 
     const tagsWrap = document.querySelector('.h-tags');
     if(tagsWrap){
       tagsWrap.innerHTML = [s.learnerType, s.eduStatus, s.eduYear ? `ปีการศึกษา ${s.eduYear}` : '', s.cnSchoolEn]
-        .filter(Boolean).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('');
+        .filter(Boolean).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('') || '<span class="tag">ไม่มีข้อมูลเพิ่มเติม</span>';
     }
 
-    setText('#infoGender', s.gender);
+    // ---------- ข้อมูลส่วนตัว ----------
+    setById('infoGender', s.gender);
+    const age = calcAge(s.birthDate);
+    setById('infoBirth', s.birthDate ? `${formatThaiDate(s.birthDate)}${age!==null ? ` (อายุ ${age} ปี)` : ''}` : '-');
 
-    // แสดงข้อมูลหลังสำเร็จการศึกษา เฉพาะเมื่อสถานะเป็น "สำเร็จการศึกษา" และมีข้อมูลกรอกไว้
+    // ---------- ข้อมูลการศึกษา (ไทย) ----------
+    setById('infoEduYear', s.eduYear);
+    setById('infoEduLevel', s.eduLevel);
+    setById('infoDepartment', s.department);
+    setById('infoMajor', s.major);
+    setById('infoClassroom', [s.classroom, s.learnGroup ? `กลุ่ม ${s.learnGroup}` : ''].filter(Boolean).join(' · '));
+    setById('infoAdmissionDate', s.admissionDate ? formatThaiDate(s.admissionDate) : '-');
+
+    const statusPill = document.getElementById('infoEduStatusPill');
+    if(statusPill){
+      statusPill.textContent = s.eduStatus || '-';
+      statusPill.className = 'status-pill ' + (s.eduStatus === 'สำเร็จการศึกษา' ? 'status-graduated' : 'status-studying');
+    }
+
+    // ---------- ข้อมูลทวิวุฒิ — ฝั่งจีน ----------
+    setById('infoCnSchool', [s.cnSchoolEn, s.cnSchoolZh ? `(${s.cnSchoolZh})` : ''].filter(Boolean).join(' '));
+    setById('infoCnProvince', [s.cnProvince, s.cnCountry].filter(Boolean).join(', '));
+    setById('infoCnFaculty', [s.cnFaculty, s.cnMajorEn, s.cnMajorZh ? `(${s.cnMajorZh})` : ''].filter(Boolean).join(' · '));
+    setById('infoCnFormat', s.cnFormat);
+    const cnDates = [s.cnStartDate ? formatThaiDateShort(s.cnStartDate) : '', s.cnEndDate ? formatThaiDateShort(s.cnEndDate) : '']
+      .filter(Boolean).join(' – ');
+    setById('infoCnDates', cnDates);
+    setById('infoCnProgramCode', s.cnProgramCode);
+    setById('infoCnQualification', s.cnQualification || s.thQualification);
+
+    // ---------- ข้อมูลหลังสำเร็จการศึกษา ----------
     const gradGrid = document.getElementById('gradInfoGrid');
     if(gradGrid && s.eduStatus === 'สำเร็จการศึกษา' && (s.gradDestination || s.gradPlace)){
       gradGrid.style.display = 'grid';
-      setText('#infoGradDestination', s.gradDestination || '-');
+      setById('infoGradDestination', s.gradDestination);
       const placeLabel = document.getElementById('infoGradPlaceLabel');
       const positionRow = document.getElementById('infoGradPositionRow');
       if(s.gradDestination === 'ทำงาน'){
@@ -307,9 +368,11 @@
         if(placeLabel) placeLabel.textContent = 'สถานศึกษาต่อ / รายละเอียด';
         if(positionRow) positionRow.style.display = 'none';
       }
-      setText('#infoGradPlace', s.gradPlace || '-');
-      setText('#infoGradPosition', s.gradPosition || '-');
+      setById('infoGradPlace', s.gradPlace);
+      setById('infoGradPosition', s.gradPosition);
       // gradSalary ไม่เคยถูกส่งมาจาก backend เลย (NEVER_EXPORT_FIELDS) — ข้อความ placeholder แสดงอยู่แล้วในหน้า HTML
+    } else if(gradGrid){
+      gradGrid.style.display = 'none';
     }
 
     // เบอร์โทร/อีเมล/ที่อยู่ ถูกกันไว้ที่ backend เสมอ (NEVER_EXPORT_FIELDS) — เว็บนี้จะไม่ได้รับค่าจริง
@@ -319,6 +382,81 @@
       const el = document.getElementById(id);
       if(el){ el.textContent = sheetOnlyMsg; el.classList.add('locked'); }
     });
+
+    // ---------- Timeline: สร้างจากวันที่จริงเท่านั้น ไม่ปั้นเหตุการณ์ที่ไม่มีข้อมูลรองรับ ----------
+    renderTimeline_(s);
+
+    // ---------- เอกสาร/ไฟล์แนบ: ยังไม่มีระบบจัดเก็บจริง แจ้งตามตรงแทนของตัวอย่าง ----------
+    const docList = document.getElementById('docList');
+    if(docList){
+      docList.innerHTML = '<p style="font-size:12.5px;color:var(--ink-400);margin:0;">ระบบยังไม่รองรับการอัปโหลด/แนบเอกสารสำหรับนักเรียนรายบุคคลในขณะนี้</p>';
+    }
+  }
+
+  const checkIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function renderTimeline_(s){
+    const list = document.getElementById('timelineList');
+    if(!list) return;
+    const isGraduated = s.eduStatus === 'สำเร็จการศึกษา';
+    const events = [];
+
+    if(s.admissionDate){
+      events.push({
+        date: s.admissionDate,
+        done: true,
+        title: `เข้าศึกษา${s.eduLevel ? ' ' + s.eduLevel : ''}${s.department ? ' แผนก' + s.department : ''}`,
+        dateText: formatThaiDate(s.admissionDate)
+      });
+    }
+    if(s.cnStartDate){
+      events.push({
+        date: s.cnStartDate,
+        done: true,
+        title: `เริ่มศึกษาที่${s.cnSchoolEn ? ' ' + s.cnSchoolEn : 'สถานศึกษาจีน'}`,
+        dateText: formatThaiDate(s.cnStartDate) + (isGraduated ? '' : ' – ปัจจุบัน')
+      });
+    }
+    if(s.cnEndDate){
+      events.push({
+        date: s.cnEndDate,
+        done: isGraduated,
+        title: isGraduated ? 'สำเร็จการศึกษา' : 'คาดว่าจะสำเร็จการศึกษา',
+        dateText: formatThaiDate(s.cnEndDate)
+      });
+    }
+
+    if(events.length === 0){
+      list.innerHTML = '<p style="font-size:12.5px;color:var(--ink-400);margin:0;">ยังไม่มีข้อมูลวันที่เพียงพอสำหรับสร้างไทม์ไลน์ (กรอกวันที่เข้าศึกษา/วันที่เริ่ม-จบทวิวุฒิจีนในฟอร์มแก้ไขข้อมูล)</p>';
+      return;
+    }
+
+    list.innerHTML = events.map(ev => `
+      <li>
+        <div class="t-dot" style="${ev.done ? '' : 'background:#D9E3F5;'}">${ev.done ? checkIcon : ''}</div>
+        <div class="t-body" style="${ev.done ? '' : 'opacity:.55;'}"><b>${escapeHtml(ev.title)}</b><span>${escapeHtml(ev.dateText)}</span></div>
+      </li>`).join('');
+  }
+
+  /** โหลดประวัติการแก้ไขจริงจาก EditLog sheet */
+  async function loadEditLog_(studentCode){
+    const container = document.getElementById('editLogList');
+    if(!container || !studentCode) return;
+    try{
+      const res = await fetch(`${API_URL}?action=getEditLog&studentCode=${encodeURIComponent(studentCode)}`);
+      const data = await res.json();
+      if(!data.success || !data.data || data.data.length === 0){
+        container.innerHTML = '<p style="font-size:12.5px;color:var(--ink-400);margin:0;">ยังไม่มีประวัติการแก้ไขข้อมูล</p>';
+        return;
+      }
+      container.innerHTML = data.data.map(log => `
+        <div class="log-item">
+          <span>${escapeHtml(log.action || '')}</span>
+          <span class="who">${escapeHtml(log.editedBy || 'ไม่ทราบผู้แก้ไข')} · ${escapeHtml(formatThaiDateShort(log.timestamp))}</span>
+        </div>`).join('');
+    }catch(err){
+      container.innerHTML = '<p style="font-size:12.5px;color:var(--ink-400);margin:0;">ไม่สามารถโหลดประวัติการแก้ไขได้ในขณะนี้</p>';
+    }
   }
 
   loadStudent();
