@@ -139,7 +139,7 @@
     appearance:none;-webkit-appearance:none;
     border:1.5px solid var(--line);border-radius:10px;
     padding:9px 30px 9px 12px;font-family:inherit;font-size:13px;color:var(--ink-900);
-    background:var(--sky-50) ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238494AC'/%3E%3C/svg%3E") no-repeat right 12px center;
+    background:var(--sky-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238494AC'/%3E%3C/svg%3E") no-repeat right 12px center;
     cursor:pointer;
   }
   .filter-actions{display:flex;gap:10px;}
@@ -287,7 +287,7 @@
 
   <div class="data-banner" id="dataBanner">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
-    <span>ยังไม่ได้เชื่อมต่อ Google Sheets จริง (API_) — กำลังแสดงข้อมูลตัวอย่างเพื่อสาธิตหน้าจอ</span>
+    <span>ยังไม่ได้เชื่อมต่อ Google Sheets จริง (API_URL) — กำลังแสดงข้อมูลตัวอย่างเพื่อสาธิตหน้าจอ</span>
   </div>
 
   <!-- KPI cards -->
@@ -346,7 +346,7 @@
   <div class="filter-bar">
     <div class="filter-field">
       <label>ปีการศึกษา</label>
-      <select id="fYear"><option value="">ทั้งหมด</option><option>2568</option><option>2569</option><option selected>2570</option></select>
+      <select id="fYear"><option value="">ทั้งหมด</option><option>2567</option><option>2568</option><option selected>2569</option></select>
     </div>
     <div class="filter-field">
       <label>แผนกวิชา</label>
@@ -450,9 +450,9 @@
 <script>
   // =====================================================================
   //  ตั้งค่าการเชื่อมต่อ Google Apps Script (Web App) ที่ deploy จาก Code.gs
-  //  แทนที่  ด้านล่างด้วย  จริงหลัง deploy แล้ว
+  //  แทนที่ URL ด้านล่างด้วย URL จริงหลัง deploy แล้ว
   // =====================================================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbyhGHBUIEsAMFoB3lsiOaMFzNkIpA1dBCyCP6-iSzSNFLY2CPI-mGDiRcKZo2r1yXbAeQ/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzsmHqHOdrpFG_VAkRMw4cjT7whIu76K469UsbnJbR5Z_iScKheSfQO2tpurw0FgLiW8A/exec";
 
   // ---------- ข้อมูลตัวอย่างสำรอง (ใช้เมื่อยังไม่ได้ตั้งค่า API_URL หรือเชื่อมต่อไม่สำเร็จ) ----------
   const MOCK_STATS = {

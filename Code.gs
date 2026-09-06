@@ -36,7 +36,7 @@ const SESSION_TTL_HOURS = 8;
 const PHOTO_FOLDER_ID = '1E5xIaAuxV_ZkVGVqkrR_VztiahlahZQW';
 
 // URL ของหน้า reset-password.html หลัง deploy ขึ้นจริงแล้ว (ใช้แนบลิงก์ในอีเมลลืมรหัสผ่าน)
-const RESET_PASSWORD_PAGE_URL = 'https://thaichina.pkc.ac.th/reset-password.html';
+const RESET_PASSWORD_PAGE_URL = 'https://thaichina.pktc.ac.th/reset-password.html';
 
 // คอลัมน์ของชีต Students (แถวหัวตาราง แถวที่ 1 ต้องตรงตามนี้ทุกตัวอักษร)
 const STUDENT_FIELDS = [
@@ -47,6 +47,8 @@ const STUDENT_FIELDS = [
   'thSchool', 'thDept', 'thMajor', 'thLevel', 'thStartDate', 'thEndDate', 'thYear', 'thQualification',
   'cnCountry', 'cnProvince', 'cnFormat', 'cnSchoolEn', 'cnSchoolZh', 'cnFaculty',
   'cnMajorEn', 'cnMajorZh', 'cnStartDate', 'cnEndDate', 'cnProgramCode', 'cnQualification', 'cnCurriculumNames',
+  // ข้อมูลหลังสำเร็จการศึกษา (กรอกเมื่อ eduStatus = "สำเร็จการศึกษา")
+  'gradDestination', 'gradPlace', 'gradPosition', 'gradSalary',
   'createdAt', 'updatedAt'
 ];
 
@@ -346,13 +348,15 @@ function resetPassword_(token, newPassword) {
 // ฟิลด์ที่ "ห้ามส่งออกผ่าน API เด็ดขาด" ไม่ว่าจะล็อกอินหรือไม่ก็ตาม
 // ต้องการดูค่าจริงต้องเปิด Google Sheet โดยตรงเท่านั้น (เว็บแอปทั้งหมดจะไม่มีทางแสดงข้อมูลเหล่านี้ได้เลย
 // แม้แต่ผู้ดูแลระบบที่ล็อกอินแล้วก็ตาม — ลดความเสี่ยงข้อมูลรั่วผ่านเว็บให้เหลือน้อยที่สุด)
-const NEVER_EXPORT_FIELDS = ['nationalId', 'phone', 'email', 'address', 'photoUrl'];
+// gradSalary (เงินเดือน) ถูกจัดเป็นข้อมูลการเงินส่วนบุคคล จึงใช้มาตรฐานเดียวกับเบอร์โทร/ที่อยู่
+const NEVER_EXPORT_FIELDS = ['nationalId', 'phone', 'email', 'address', 'photoUrl', 'gradSalary'];
 
 // ฟิลด์ที่ "แสดงต่อสาธารณะได้" — ใช้กับ Dashboard และตารางที่ไม่ต้องล็อกอิน
 const PUBLIC_STUDENT_FIELDS = [
   'studentCode', 'prefix', 'firstName', 'lastName', 'englishName', 'gender',
   'department', 'major', 'eduLevel', 'eduYear', 'learnerType', 'eduStatus',
-  'classroom', 'cohort', 'cnSchoolEn', 'cnCountry', 'cnProvince'
+  'classroom', 'cohort', 'cnSchoolEn', 'cnCountry', 'cnProvince',
+  'gradDestination', 'gradPlace', 'gradPosition'
 ];
 
 /**
